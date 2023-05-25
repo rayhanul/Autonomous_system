@@ -1,0 +1,338 @@
+{
+    "0": {
+        "labels": [
+            "h0",
+            "green",
+             "a8"
+        ],
+        "action": 0
+    },
+    "1": {
+        "labels": [
+            "h0",
+            "a8",
+            "red"
+        ],
+        "action": 0
+    },
+    "2": {
+        "labels": [
+            "h1",
+            "green",
+            "a8"
+        ],
+        "action": 0
+    },
+    "3": {
+        "labels": [
+            "h1",
+            "red",
+            "a8"
+        ],
+        "action": 0
+    },
+    "4": {
+        "labels": [
+            "a4",
+            "green",
+            "h0"
+        ],
+        "action": 0
+    },
+    "5": {
+        "labels": [
+            "a4",
+            "h0",
+            "red"
+        ],
+        "action": 0
+    },
+    "6": {
+        "labels": [
+            "a4",
+            "green",
+            "h1"
+        ],
+        "action": 0
+    },
+    "7": {
+        "labels": [
+            "a4",
+            "red",
+            "h1"
+        ],
+        "action": 0
+    },
+    "8": {
+        "labels": [
+            "green",
+            "a8",
+            "h2"
+        ],
+        "action": 0
+    },
+    "9": {
+        "labels": [
+            "red",
+            "a8",
+            "h2"
+        ],
+        "action": 0
+    },
+    "10": {
+        "labels": [
+            "a4",
+            "green",
+            "h2"
+        ],
+        "action": 0
+    },
+    "11": {
+        "labels": [
+            "a4",
+            "red",
+            "h2"
+        ],
+        "action": 0
+    },
+    "12": {
+        "labels": [
+            "a9",
+            "green",
+            "h0"
+        ],
+        "action": 0
+    },
+    "13": {
+        "labels": [
+            "a9",
+            "h0",
+            "red"
+        ],
+        "action": 0
+    },
+    "14": {
+        "labels": [
+            "a9",
+            "green",
+            "h1"
+        ],
+        "action": 0
+    },
+    "15": {
+        "labels": [
+            "a9",
+            "red",
+            "h1"
+        ],
+        "action": 0
+    },
+    "16": {
+        "labels": [
+            "a9",
+            "green",
+            "h2"
+        ],
+        "action": 0
+    },
+    "17": {
+        "labels": [
+            "a9",
+            "red",
+            "h2"
+        ],
+        "action": 0
+    },
+    "18": {
+        "labels": [
+            "h3",
+            "green",
+            "a8"
+        ],
+        "action": 0
+    },
+    "19": {
+        "labels": [
+            "h3",
+            "red",
+            "a8"
+        ],
+        "action": 0
+    },
+    "20": {
+        "labels": [
+            "a4",
+            "h3",
+            "green"
+        ],
+        "action": 0
+    },
+    "21": {
+        "labels": [
+            "a4",
+            "h3",
+            "red"
+        ],
+        "action": 0
+    },
+    "22": {
+        "labels": [
+            "h3",
+            "a9",
+            "green"
+        ],
+        "action": 0
+    },
+    "23": {
+        "labels": [
+            "h3",
+            "a9",
+            "red"
+        ],
+        "action": 0
+    },
+    "24": {
+        "labels": [
+            "h4",
+            "green",
+            "a8"
+        ],
+        "action": 0
+    },
+    "25": {
+        "labels": [
+            "h4",
+            "red",
+            "a8"
+        ],
+        "action": 0
+    },
+    "26": {
+        "labels": [
+            "a4",
+            "green",
+            "h4"
+        ],
+        "action": 0
+    },
+    "27": {
+        "labels": [
+            "a4",
+            "red",
+            "h4"
+        ],
+        "action": 0
+    },
+    "28": {
+        "labels": [
+            "a9",
+            "green",
+            "h4"
+        ],
+        "action": 0
+    },
+    "29": {
+        "labels": [
+            "a9",
+            "red",
+            "h4"
+        ],
+        "action": 0
+    },
+    "30": {
+        "labels": [
+            "h5",
+            "green",
+            "a8"
+        ],
+        "action": 0
+    },
+    "31": {
+        "labels": [
+            "h5",
+            "red",
+            "a8"
+        ],
+        "action": 0
+    },
+    "32": {
+        "labels": [
+            "h5",
+            "a4",
+            "green"
+        ],
+        "action": 0
+    },
+    "33": {
+        "labels": [
+            "h5",
+            "a4",
+            "red"
+        ],
+        "action": 0
+    },
+    "34": {
+        "labels": [
+            "h5",
+            "a9",
+            "green"
+        ],
+        "action": 0
+    },
+    "35": {
+        "labels": [
+            "h5",
+            "a9",
+            "red"
+        ],
+        "action": 0
+    },
+    "36": {
+        "labels": [
+            "h6",
+            "green",
+            "a8"
+        ],
+        "action": 0
+    },
+    "37": {
+        "labels": [
+            "h6",
+            "a8",
+            "red"
+        ],
+        "action": 0
+    },
+    "38": {
+        "labels": [
+            "a4",
+            "green",
+            "h6"
+        ],
+        "action": 0
+    },
+    "39": {
+        "labels": [
+            "a4",
+            "h6",
+            "red"
+        ],
+        "action": 0
+    },
+    "40": {
+        "labels": [
+            "a9",
+            "green",
+            "h6"
+        ],
+        "action": 0
+    },
+    "41": {
+        "labels": [
+            "a9",
+            "h6",
+            "red"
+        ],
+        "action": 0
+    }
+}

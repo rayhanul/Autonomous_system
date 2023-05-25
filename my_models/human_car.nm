@@ -1,0 +1,31 @@
+mdp 
+
+module human_car
+
+s: [0..6] init 0;
+	
+	[go] s=0 ->  1 : (s'=1);
+	[stop] s=0 -> 1 : (s'=0);
+	[go] s=1 ->  1 : (s'=2);
+	[stop] s=1 -> 1 : (s'=1);
+	[go] s=2 ->  1 : (s'=3);
+	[stop] s=2 -> 1 : (s'=2);
+	[go] s=3 ->  1 : (s'=4);
+	[stop] s=3 -> 1 : (s'=3);
+	[go] s=4 ->  1 : (s'=5);
+	[stop] s=4 -> 1 : (s'=4);
+	[go] s=5 ->  1 : (s'=6);
+	[stop] s=5 -> 1 : (s'=5);
+	[go] s=6 ->  1 : (s'=6);
+	[stop] s=6 -> 1 : (s'=6);
+
+endmodule
+
+label "h0" = s=0;
+label "h1" = s=1;
+label "h2" = s=2;
+label "h3" = s=3;
+label "h4" = s=4;
+label "h5" = s=5;
+label "h6" = s=6;
+
