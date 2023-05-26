@@ -40,7 +40,7 @@ class Prism_Model_Generator:
         for index, item in new_labels.items():
             label=""
             for ele in item:
-                label += 'p='+str(ele)+'|'
+                label += '(p='+str(ele)+')|'
             label=label[:-1]
             labels+= f'label "{index}" = {label} ; \n'
         return labels

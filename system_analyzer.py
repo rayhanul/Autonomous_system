@@ -3,8 +3,8 @@ import os
 from mc import *
 from finite_mc import * 
 from Prism_model_generator import * 
-
-
+import re 
+import json 
 
 from tulip.interfaces import stormpy as stormpy_int
 from tulip.transys.compositions import synchronous_parallel
@@ -68,7 +68,7 @@ if __name__=="__main__":
     # p, q, r = generate_pqr()
 
     mc_1_transition={
-        "p7":{"p3":.60, "p7":.30, "p8":.1},
+        "p7":{"p3":.90, "p7":.08, "p8":.02},
         "p3": {"p10":1}, 
         "p4": {"p10":1}, 
         "p5": {"p10":1}, 
@@ -106,25 +106,65 @@ if __name__=="__main__":
 
     print("composed done") 
 
-    property_tobe_verfied='Pmax=?[! "crash" U "goal"]'
+    property_tobe_verfied='Pmax=?[!"crash" U "goal"]'
     path=os.path.join(analyzer.model_path, 'final_combined_model.nm')
+
+    # analyzer.get_probability_satisfying_property(property_tobe_verfied)
+
+
     prism_program=stormpy.parse_prism_program(path)
     properties=stormpy.parse_properties(property_tobe_verfied, prism_program)
-    options=stormpy.BuilderOptions(True, True)
-    options.set_build_state_valuations()
-    options.set_build_choice_labels()
-    print(options)
-    model=stormpy.build_sparse_exact_model_with_options(prism_program, options)
+    # options=stormpy.BuilderOptions(True, True)
+    # options.set_build_state_valuations()
+    # options.set_build_choice_labels()
+    # print(options)
+    # model=stormpy.build_sparse_exact_model_with_options(prism_program, options)
+    model=stormpy.build_sparse_model(prism_program)
 
+    print(f'number of states : {model.nr_states}, ')
 
-    result=stormpy.model_checking(model, properties[0], extract_scheduler=True)
+    result=stormpy.model_checking(model, properties[0], only_initial_states=False, extract_scheduler=True) 
 
     # result ...
     initial_state=model.initial_states[0]
     print("result at initial state: {0}".format(result.at(initial_state)))
 
+    print(result.scheduler.get_choice(0).get_deterministic_choice())
+
+    Agent1_pol = dict()
+    move_ids = [m_s.id for m_s in model.states for s_i in m_s.labels if 'go' in s_i or 'stop' in s_i]
+
+    action_points = set(range(model.nr_states)) - set(move_ids)
+    actions1 = ['go1','stop1']
+    
+    for s_i in action_points:
+        print(model.states[s_i].labels)
+        for l_i in model.states[s_i].labels:
+            if 'a' in l_i and not 'crash' in l_i:
+                s_state = l_i
+            elif 'h' in l_i:
+                x_state = l_i
+            elif 'p' in l_i:
+                p_state = l_i
+        deterministic_choice=result.scheduler.get_choice(s_i).get_deterministic_choice()
+        transition_at_s_i = model.states[s_i].actions[deterministic_choice].transitions
+        hold_state = model.states[int(re.findall('\\d+',str(transition_at_s_i))[0])]
+        next_action = result.scheduler.get_choice(hold_state).get_deterministic_choice()
+        next_state = model.states[int(re.findall('\\d+', str(hold_state.actions[int(next_action)].transitions))[0])]
+        if 'crash' not in next_state.labels and 'goal' not in next_state.labels:
+            act_tup = tuple()
+            act_tup += ([l_ind for l_ind,l_a in enumerate(actions1) if l_a in next_state.labels][0],)
+            action_index=act_tup[0]
+            action_name=actions1[action_index]
+            Agent1_pol.update({(s_state, x_state, p_state): action_name })
 
 
+    with open('policy.json', 'w') as policy_file:
+        for key, value in Agent1_pol.items():
+            
+            policy_file.write(f'state label : {key}, and action : {value}\n')
+
+    print("I am here")
 
     # composed_model=analyzer.get_composed_model()
     # properties = stormpy.parse_properties_for_prism_program(property_tobe_verfied, composed_model)
