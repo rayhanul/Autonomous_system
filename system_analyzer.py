@@ -159,12 +159,11 @@ if __name__=="__main__":
             Agent1_pol.update({(s_state, x_state, p_state): action_name })
 
 
-    with open('policy.json', 'w') as policy_file:
+    with open('policy.txt', 'w') as policy_file:
         for key, value in Agent1_pol.items():
-            
+            print(f'state label : {key}, and action : {value}\n')
             policy_file.write(f'state label : {key}, and action : {value}\n')
 
-    print("I am here")
 
     # composed_model=analyzer.get_composed_model()
     # properties = stormpy.parse_properties_for_prism_program(property_tobe_verfied, composed_model)
