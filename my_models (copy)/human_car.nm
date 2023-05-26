@@ -1,9 +1,11 @@
 mdp 
 
-module autonomous_car
+module human_car
 
-s: [1..6] init 1;
+s: [0..6] init 0;
 	
+	[go] s=0 ->  1 : (s'=1);
+	[stop] s=0 -> 1 : (s'=0);
 	[go] s=1 ->  1 : (s'=2);
 	[stop] s=1 -> 1 : (s'=1);
 	[go] s=2 ->  1 : (s'=3);
@@ -19,11 +21,11 @@ s: [1..6] init 1;
 
 endmodule
 
-
-label "s1" = s=1;
-label "s2" = s=2;
-label "s3" = s=3;
-label "s4" = s=4;
-label "s5" = s=5;
-label "s6" = s=6;
+label "h0" = s=0;
+label "h1" = s=1;
+label "h2" = s=2;
+label "h3" = s=3;
+label "h4" = s=4;
+label "h5" = s=5;
+label "h6" = s=6;
 
