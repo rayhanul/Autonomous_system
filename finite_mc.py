@@ -5,7 +5,7 @@ from helper import *
 
 
 class BeliefTransition:
-    def __init__(self, mcs, selected_mc, limit, mcs_states=None):
+    def __init__(self, mcs, selected_mc, init_belief='b6', limit=20, mcs_states=None):
         """
         mcs-list of MCs
         """
@@ -13,16 +13,16 @@ class BeliefTransition:
         self.selected_mc=selected_mc
         self.mc_states=mcs_states
         self.belief_sets=["b"+str(i) for i in range(0,limit)]
-        self.init_belief="b6"
+        self.init_belief=init_belief
         self.init_belief_probability={1:0.5, 2:0.5}
 
 
-    def get_next_belief_index(self, current_state, next_state, current_belief):
+    def get_next_belief_index(self, current_state, next_state, current_belief, in_road=["p3","p4", "p5", "p10"]):
         '''
         return next belief index
         '''
         current_belief_index=int(current_belief[1])
-        if next_state in ["p3","p4", "p5", "p10"]:
+        if next_state in in_road:
             return 0
 
         if current_belief_index==0 or current_belief_index==11:
@@ -55,8 +55,7 @@ class BeliefTransition:
     def is_valid_belief_transition(self, state, next_state, current_belief):
 
         next_belief_index=int(next_state[1][1])
-        belief_index=self.get_next_belief_index(state[0], next_state[0], state[1])
-        # and self.get_state_transition_probability(state, next_state) > 0
+        belief_index=self.get_next_belief_index(state[0], next_state[0], state[1], ["p3","p4", "p5", "p10"])
         if belief_index==next_belief_index :
             return True
         else:
@@ -75,15 +74,14 @@ class BeliefTransition:
 
         return round(prob,2)
 
-    def get_belief_model(self):
+    def get_belief_model(self, init_state=('p7','b6')):
 
         all_states= self.get_all_other_model_states()
         all_states=sorted(all_states)
         product_states=[(state, belief) for state in all_states for belief in self.belief_sets]
         # product_states=[state for state in product_states if state[0]!='s7']
-        init_state=('p7','b6')
         product_states =[ state for state in product_states if state!=init_state]
-        product_states.insert(0, ('p7','b6'))
+        product_states.insert(0, init_state)
         all_transitions={}
         for state in product_states: 
             next_transitions={}
@@ -215,8 +213,8 @@ class BeliefTransition:
 
 
 
-#     b_transition=BeliefTransition([mc_1, mc_2], 1, 20)
-#     b=b_transition.get_belief_model()
+#     b_transition=BeliefTransition([mc_1, mc_2],  1, 'b6, 20)
+#     b=b_transition.get_belief_model(('p7','b6'))
 #     # print(b)
 #     b_unreach=b_transition.remove_unreachable_states(b)
 #     print(b_unreach)
