@@ -72,7 +72,7 @@ if __name__=="__main__":
         "p3": {"p10":1}, 
         "p4": {"p10":1}, 
         "p5": {"p10":1}, 
-        "p8":{"p8": .30, "p4": .60, "p9":.10},
+        "p8":{"p8": .30, "p4": .60, "p9":.05, "p7":.05},
         "p9":{"p5":.6, "p9":.3, "p8":.1},
         "p10":{"p10":1}
     }
@@ -114,10 +114,6 @@ if __name__=="__main__":
 
     prism_program=stormpy.parse_prism_program(path)
     properties=stormpy.parse_properties(property_tobe_verfied, prism_program)
-    # options=stormpy.BuilderOptions(True, True)
-    # options.set_build_state_valuations()
-    # options.set_build_choice_labels()
-    # print(options)
     # model=stormpy.build_sparse_exact_model_with_options(prism_program, options)
     model=stormpy.build_sparse_model(prism_program)
 

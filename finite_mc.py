@@ -24,7 +24,8 @@ class BeliefTransition:
         current_belief_index=int(current_belief[1])
         if next_state in ["p3","p4", "p5", "p10"]:
             return 0
-        if next_state in ["p0", "s6"]:
+
+        if current_belief_index==0 or current_belief_index==11:
             return current_belief_index
         else:
             return current_belief_index+1
@@ -173,55 +174,55 @@ class BeliefTransition:
 
 
 
-if __name__=="__main__":
+# if __name__=="__main__":
 
-    p, q, r = generate_pqr()
+#     p, q, r = generate_pqr()
 
-    # mc_1_transition={
-    #     "s7":{"s3":p, "s7":q, "s8":r},
-    #     "s3": {"s10":1}, 
-    #     "s4": {"s10":1}, 
-    #     "s5": {"s10":1}, 
-    #     "s8":{"s8": q, "s4": p, "s9":r},
-    #     "s9":{"s5":p, "s9":q, "s8":r},
-    #     "s10":{"s10":1}
-    # }
-    # model of crossing the road
-    mc_1_transition={
-        "p7":{"p3":.60, "p7":.30, "p8":.1},
-        "p3": {"p10":1}, 
-        "p4": {"p10":1}, 
-        "p5": {"p10":1}, 
-        "p8":{"p8": .30, "p4": .60, "p9":.10},
-        "p9":{"p5":.6, "p9":.3, "p8":.1},
-        "p10":{"p10":1}
-    }
-    p,q=generate_pq()
+#     # mc_1_transition={
+#     #     "s7":{"s3":p, "s7":q, "s8":r},
+#     #     "s3": {"s10":1}, 
+#     #     "s4": {"s10":1}, 
+#     #     "s5": {"s10":1}, 
+#     #     "s8":{"s8": q, "s4": p, "s9":r},
+#     #     "s9":{"s5":p, "s9":q, "s8":r},
+#     #     "s10":{"s10":1}
+#     # }
+#     # model of crossing the road
+#     mc_1_transition={
+#         "p7":{"p3":.60, "p7":.30, "p8":.1},
+#         "p3": {"p10":1}, 
+#         "p4": {"p10":1}, 
+#         "p5": {"p10":1}, 
+#         "p8":{"p8": .30, "p4": .60, "p9":.10},
+#         "p9":{"p5":.6, "p9":.3, "p8":.1},
+#         "p10":{"p10":1}
+#     }
+#     p,q=generate_pq()
 
-    # mc_2_transition={
-    #     "s7":{"s8":p, "s7":q},
-    #     "s8":{"s8": q, "s7": p/2, "s9":p/2},
-    #     "s9":{"s9":q, "s8":p}
-    # }
-    # model of staying in the one side of the road
-    mc_2_transition={
-        "p7":{"p8":.6, "p7":.4},
-        "p8":{"p8": .4, "p7": .3, "s9":.3},
-        "p9":{"p9":.4, "p8":.6}
-    }
-    mc_1=MC(init="p7", transitions=mc_1_transition, states=["p7", "p3", "p4", "p5", "p8", "p9", "p10"], labels={"p7":7, "p3":3, "p4":4, "p5":5, "p8":8, "p9":9, "p10":10})
-    mc_2=MC(init="p7", transitions=mc_2_transition, states=["p7", "p8", "p9"], labels={"p7":7, "p8":8, "p9":9})
+#     # mc_2_transition={
+#     #     "s7":{"s8":p, "s7":q},
+#     #     "s8":{"s8": q, "s7": p/2, "s9":p/2},
+#     #     "s9":{"s9":q, "s8":p}
+#     # }
+#     # model of staying in the one side of the road
+#     mc_2_transition={
+#         "p7":{"p8":.6, "p7":.4},
+#         "p8":{"p8": .4, "p7": .3, "s9":.3},
+#         "p9":{"p9":.4, "p8":.6}
+#     }
+#     mc_1=MC(init="p7", transitions=mc_1_transition, states=["p7", "p3", "p4", "p5", "p8", "p9", "p10"], labels={"p7":7, "p3":3, "p4":4, "p5":5, "p8":8, "p9":9, "p10":10})
+#     mc_2=MC(init="p7", transitions=mc_2_transition, states=["p7", "p8", "p9"], labels={"p7":7, "p8":8, "p9":9})
 
 
 
-    b_transition=BeliefTransition([mc_1, mc_2], 1, 20)
-    b=b_transition.get_belief_model()
-    # print(b)
-    b_unreach=b_transition.remove_unreachable_states(b)
-    print(b_unreach)
-    # b2=b_transition.get_normalized_transition(b)
-    # print(b2)
-    b2=b_unreach
-    new_mc=b_transition.get_complete_MC(b2)
-    print(new_mc.transitions)
-    print(new_mc.labels)
+#     b_transition=BeliefTransition([mc_1, mc_2], 1, 20)
+#     b=b_transition.get_belief_model()
+#     # print(b)
+#     b_unreach=b_transition.remove_unreachable_states(b)
+#     print(b_unreach)
+#     # b2=b_transition.get_normalized_transition(b)
+#     # print(b2)
+#     b2=b_unreach
+#     states, new_mc=b_transition.get_complete_MC(b2)
+#     print(new_mc.transitions)
+#     print(new_mc.labels)
