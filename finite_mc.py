@@ -2,10 +2,10 @@
 import  itertools
 from mc import MC
 from helper import * 
-
+from collections import deque 
 
 class BeliefTransition:
-    def __init__(self, mcs, selected_mc, init_belief='b6', limit=20, mcs_states=None):
+    def __init__(self, mcs, selected_mc, init_belief='b6', limit=9, mcs_states=None):
         """
         mcs-list of MCs
         """
@@ -17,15 +17,15 @@ class BeliefTransition:
         self.init_belief_probability={1:0.5, 2:0.5}
 
 
-    def get_next_belief_index(self, current_state, next_state, current_belief, in_road=["p3","p4", "p5", "p10"]):
+    def get_next_belief_index(self, current_state, next_state, current_belief, road=["c2","c4", "c6", "c7"]):
         '''
         return next belief index
         '''
         current_belief_index=int(current_belief[1])
-        if next_state in in_road:
+        if next_state in road:
             return 0
 
-        if current_belief_index==0 or current_belief_index==11:
+        if current_belief_index==0 or current_belief_index==8:
             return current_belief_index
         else:
             return current_belief_index+1
@@ -41,7 +41,7 @@ class BeliefTransition:
             current_belief=int(current_belief[1])
         if current_belief == 6: # initial belief 
             return 0.5 
-        if mc_index==1:
+        if mc_index==2:
             return 1-0.1 * int(current_belief)
         else :
             return 0.1 * int(current_belief)
@@ -55,7 +55,7 @@ class BeliefTransition:
     def is_valid_belief_transition(self, state, next_state, current_belief):
 
         next_belief_index=int(next_state[1][1])
-        belief_index=self.get_next_belief_index(state[0], next_state[0], state[1], ["p3","p4", "p5", "p10"])
+        belief_index=self.get_next_belief_index(state[0], next_state[0], state[1], ["c2","c4", "c6", "c7"])
         if belief_index==next_belief_index :
             return True
         else:
@@ -74,7 +74,7 @@ class BeliefTransition:
 
         return round(prob,2)
 
-    def get_belief_model(self, init_state=('p7','b6')):
+    def get_belief_model(self, init_state=('c7','b6')):
 
         all_states= self.get_all_other_model_states()
         all_states=sorted(all_states)
@@ -103,6 +103,51 @@ class BeliefTransition:
                 reachable_transition.update({key:item})
         return reachable_transition
     
+    def get_complete_environment_model(self, init_belief):
+
+        visited=[]
+        transitions={}
+
+        Q=deque()
+        Q.append(init_belief)
+
+        while len(Q) > 0:
+
+            elem=Q.popleft()
+            visited.append(elem)
+            all_next_states=self.get_all_next_states(elem[0])
+            transition={}
+            if elem==('c3', 'b7'):
+                print("I am inside")
+            for state in all_next_states:
+                next_belief_index = self.get_next_belief_index(elem[0], state, elem[1])
+                belief='b'+str(next_belief_index)
+                next_belief_state=(state, belief)
+                if not next_belief_state in visited :
+                    Q.append(next_belief_state)
+
+                prob=self.get_belief_state_transition_probability(elem, next_belief_state, elem[1])
+                transition.update({next_belief_state:prob})
+            if len(transition) > 0 :
+                transitions.update({elem:transition})
+
+        return transitions 
+
+    def get_all_next_states(self, state):
+
+        all_next_states=set()
+        for mc in self.mcs:
+            try:
+                trans=mc.transitions[state] 
+            except:
+                trans={}
+                
+            all_keys=set(trans.keys())
+            all_next_states=all_next_states.union(all_keys)
+        ordered_items=list(all_next_states)
+        ordered_items.sort()
+        return ordered_items
+
 
     def get_normalized_transition(self, transition):
         
@@ -121,8 +166,9 @@ class BeliefTransition:
         states= set(states)
         states2=set(states2)
         states=states.union(states2)
-
-        return states
+        ordered_states=list(states)
+        ordered_states.sort()
+        return ordered_states
     def assign_labels(self, states):
         labels={}
         
@@ -138,10 +184,9 @@ class BeliefTransition:
             index+=1
 
         return new_states
-    def get_complete_MC(self, transition):
+    def get_complete_MC(self, transition, init=('c1','b6')):
 
         states=self.get_all_states(transition)
-        states=list(states)
         labels=self.assign_labels(states)
 
         new_state_mapping_dict=self.get_new_state_mapping(states)
@@ -153,7 +198,7 @@ class BeliefTransition:
             label=labels[state]
             new_labels.update({new_state:label})
 
-        init_state=new_state_mapping_dict[('p7','b6')]
+        init_state=new_state_mapping_dict[init]
 
         # updating transition states...
         new_transitions={}
@@ -224,3 +269,30 @@ class BeliefTransition:
 #     states, new_mc=b_transition.get_complete_MC(b2)
 #     print(new_mc.transitions)
 #     print(new_mc.labels)
+
+    # mc_2_transition={
+    #     "c1":{"c2":.60, "c1":.3, "c3":.1},
+    #     "c2": {"c7":1}, 
+    #     "p7": {"c7":1}, 
+    #     "c3": {"c3":.3, "c1":0.05, "c4":.6, "c5":.05}, 
+    #     "c4":{"c7": 1},
+    #     "c5":{"c5":.3, "c6":.6, "c3":.1},
+    #     "c6":{"c7":1}
+    # }
+
+    # mc_1_transition={
+    #     "c1":{"c3":.6, "c1":.4},
+    #     "c3":{"c3": .3, "c5": .35, "c1":.35},
+    #     "c5":{"c5":.7, "c3":.3}
+    # }
+    # mc_1=MC(init="c1", transitions=mc_1_transition, states=["c1", "c3", "c5"], labels={"c1":1, "c3":3, "c5":5})
+    # mc_2=MC(init="c1", transitions=mc_2_transition, states=["c1", "c2", "c3", "c4", "c5", "c6", "c7"], labels={"c1":1, "c2":2, "c3":3, "c4":4, "c5":5, "c6":6, "c7":7})
+    
+
+
+
+    # b_transition=BeliefTransition([mc_1, mc_2], 1, 9)
+
+    # b2=b_transition.get_complete_environment_model(('c1','b6'))
+    
+    # print(b2)
