@@ -43,7 +43,7 @@ class Analyzer:
             file.write(program)
 
     def create_combined_model(self, addinational_text):
-        path=os.path.join(self.model_path, 'template_model.txt')
+        path=os.path.join(self.model_path, 'template_model_2.txt')
         with open(path, 'r') as source_file:
             content = source_file.read()
         path=os.path.join(self.model_path, 'final_combined_model.nm')
@@ -67,30 +67,54 @@ if __name__=="__main__":
 
     # p, q, r = generate_pqr()
 
-    mc_1_transition={
-        "p7":{"p3":.90, "p7":.08, "p8":.02},
-        "p3": {"p10":1}, 
-        "p4": {"p10":1}, 
-        "p5": {"p10":1}, 
-        "p8":{"p8": .30, "p4": .60, "p9":.05, "p7":.05},
-        "p9":{"p5":.6, "p9":.3, "p8":.1},
-        "p10":{"p10":1}
-    }
+    # mc_2_transition={
+    #     "p7":{"p3":.90, "p7":.08, "p8":.02},
+    #     "p3": {"p10":1}, 
+    #     "p4": {"p10":1}, 
+    #     "p5": {"p10":1}, 
+    #     "p8":{"p8": .30, "p4": .60, "p9":.05, "p7":.05},
+    #     "p9":{"p5":.6, "p9":.3, "p8":.1},
+    #     "p10":{"p10":1}
+    # }
 
+    # mc_1_transition={
+    #     "p7":{"p8":.6, "p7":.4},
+    #     "p8":{"p8": .4, "p7": .3, "s9":.3},
+    #     "p9":{"p9":.4, "p8":.6}
+    # }
     mc_2_transition={
-        "p7":{"p8":.6, "p7":.4},
-        "p8":{"p8": .4, "p7": .3, "s9":.3},
-        "p9":{"p9":.4, "p8":.6}
+        "p1":{"p2":.60, "p1":.3, "p3":.1},
+        "p2": {"p7":1}, 
+        "p7": {"p7":1}, 
+        "p3": {"p3":.3, "p1":0.05, "p4":.6, "p5":.05}, 
+        "p4":{"p7": 1},
+        "p5":{"p5":.3, "p6":.6, "p3":.1},
+        "p6":{"p7":1}
     }
-    mc_1=MC(init="p7", transitions=mc_1_transition, states=["p7", "p3", "p4", "p5", "p8", "p9", "p10"], labels={"p7":7, "p3":3, "p4":4, "p5":5, "p8":8, "p9":9, "p10":10})
-    mc_2=MC(init="p7", transitions=mc_2_transition, states=["p7", "p8", "p9"], labels={"p7":7, "p8":8, "p9":9})
+
+    mc_1_transition={
+        "p1":{"p3":.6, "p1":.4},
+        "p3":{"p3": .3, "p5": .35, "p1":.35},
+        "p5":{"p5":.7, "p3":.3}
+    }
+    mc_1=MC(init="p1", transitions=mc_1_transition, states=["p1", "p3", "p5"], labels={"p1":1, "p3":3, "p5":5})
+    mc_2=MC(init="p1", transitions=mc_2_transition, states=["p1", "p2", "p3", "p4", "p5", "p6", "p7"], labels={"p1":1, "p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7})
+    
+    # mc_1=MC(init="p7", transitions=mc_1_transition, states=["p7", "p3", "p4", "p10", "p7", "p8", "p9"], labels={"p3":3, "p4":4, "p10":10, "p6":6, "p7":7, "p8":8, "p9":9})
+    # mc_2=MC(init="p7", transitions=mc_2_transition, states=["p7", "p8", "p9"], labels={ "p9":9, "p8":8, "p7":7})
+    
 
 
+    b_transition=BeliefTransition(mcs=[mc_1, mc_2], selected_mc= 1,  limit=9, discretized_road=["p2","p4", "p6", "p7"] )
 
-    b_transition=BeliefTransition([mc_1, mc_2], 1, 20)
-    b=b_transition.get_belief_model()
-    b2=b_transition.remove_unreachable_states(b)
-    old_states, b3=b_transition.get_complete_MC(b2)
+    b3=b_transition.get_complete_environment_model(b_transition.initial_belief_state)
+    print(b3)
+    # b1=b_transition.get_belief_model()
+    # # b3=b_transition.remove_unreachable_states(b1)
+    # b3=b_transition.get_normalized_transition(b1)
+
+
+    old_states, b3=b_transition.get_complete_MC(b3, b_transition.initial_belief_state )
     prism_model_generator=Prism_Model_Generator(b3, old_states)
     environment_prism_model=prism_model_generator.get_prism_model()
     
@@ -105,8 +129,7 @@ if __name__=="__main__":
 
 
     print("composed done") 
-
-    property_tobe_verfied='Pmax=?[!"crash" U "goal"]'
+    property_tobe_verfied='Pmax=?[!(("a2" & "p2") | ("a4" & "p4") | ("a6" & "p6")) U "goal"]'
     path=os.path.join(analyzer.model_path, 'final_combined_model.nm')
 
     # analyzer.get_probability_satisfying_property(property_tobe_verfied)
@@ -125,40 +148,44 @@ if __name__=="__main__":
     initial_state=model.initial_states[0]
     print("result at initial state: {0}".format(result.at(initial_state)))
 
-    print(result.scheduler.get_choice(0).get_deterministic_choice())
+    # print(result.scheduler.get_choice(0).get_deterministic_choice())
 
-    Agent1_pol = dict()
-    move_ids = [m_s.id for m_s in model.states for s_i in m_s.labels if 'go' in s_i or 'stop' in s_i]
+    # Agent1_pol = dict()
+    # move_ids = [m_s.id for m_s in model.states for s_i in m_s.labels if 'go' in s_i or 'stop' in s_i]
 
-    action_points = set(range(model.nr_states)) - set(move_ids)
-    actions1 = ['go1','stop1']
+    # action_points = set(range(model.nr_states)) - set(move_ids)
+    # actions1 = ['go1','stop1']
     
-    for s_i in action_points:
-        print(model.states[s_i].labels)
-        for l_i in model.states[s_i].labels:
-            if 'a' in l_i and not 'crash' in l_i:
-                s_state = l_i
-            elif 'h' in l_i:
-                x_state = l_i
-            elif 'p' in l_i:
-                p_state = l_i
-        deterministic_choice=result.scheduler.get_choice(s_i).get_deterministic_choice()
-        transition_at_s_i = model.states[s_i].actions[deterministic_choice].transitions
-        hold_state = model.states[int(re.findall('\\d+',str(transition_at_s_i))[0])]
-        next_action = result.scheduler.get_choice(hold_state).get_deterministic_choice()
-        next_state = model.states[int(re.findall('\\d+', str(hold_state.actions[int(next_action)].transitions))[0])]
-        if 'crash' not in next_state.labels and 'goal' not in next_state.labels:
-            act_tup = tuple()
-            act_tup += ([l_ind for l_ind,l_a in enumerate(actions1) if l_a in next_state.labels][0],)
-            action_index=act_tup[0]
-            action_name=actions1[action_index]
-            Agent1_pol.update({(s_state, x_state, p_state): action_name })
+    # # for index in range(model.nr_states):
+    # #     print(model.states[index].labels)
+
+    # for s_i in action_points:
+    #     print(model.states[s_i].labels)
+    #     for l_i in model.states[s_i].labels:
+    #         if 'a' in l_i and not 'crash' in l_i:
+    #             s_state = l_i
+    #         elif 'h' in l_i:
+    #             x_state = l_i
+    #         elif 'c' in l_i:
+    #             p_state = l_i
+    #     deterministic_choice=result.scheduler.get_choice(s_i).get_deterministic_choice()
+    #     transition_at_s_i = model.states[s_i].actions[deterministic_choice].transitions
+    #     hold_state = model.states[int(re.findall('\\d+',str(transition_at_s_i))[0])]
+    #     next_action = result.scheduler.get_choice(hold_state).get_deterministic_choice()
+    #     next_state = model.states[int(re.findall('\\d+', str(hold_state.actions[int(next_action)].transitions))[0])]
+
+    #     if 'crash' not in next_state.labels and 'goal' not in next_state.labels:
+    #         act_tup = tuple()
+    #         act_tup += ([l_ind for l_ind,l_a in enumerate(actions1) if l_a in next_state.labels][0],)
+    #         action_index=act_tup[0]
+    #         action_name=actions1[action_index]
+    #         Agent1_pol.update({(s_state, x_state, p_state): action_name })
 
 
-    with open('policy.txt', 'w') as policy_file:
-        for key, value in Agent1_pol.items():
-            print(f'state label : {key}, and action : {value}\n')
-            policy_file.write(f'state label : {key}, and action : {value}\n')
+    # with open('policy.txt', 'w') as policy_file:
+    #     for key, value in Agent1_pol.items():
+    #         print(f'state label : {key}, and action : {value}\n')
+    #         policy_file.write(f'state label : {key}, and action : {value}\n')
 
 
     # composed_model=analyzer.get_composed_model()

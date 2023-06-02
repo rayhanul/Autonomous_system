@@ -5,7 +5,7 @@ from helper import *
 from collections import deque 
 
 class BeliefTransition:
-    def __init__(self, mcs, selected_mc, init_belief='b6', limit=9, mcs_states=None):
+    def __init__(self, mcs, selected_mc, limit=9, mcs_states=None, discretized_road=["p2","p4", "p6", "p7"], init_belief='b6'):
         """
         mcs-list of MCs
         """
@@ -14,15 +14,17 @@ class BeliefTransition:
         self.mc_states=mcs_states
         self.belief_sets=["b"+str(i) for i in range(0,limit)]
         self.init_belief=init_belief
+        self.initial_belief_state=(mcs[0].init, init_belief)
         self.init_belief_probability={1:0.5, 2:0.5}
+        self.road=discretized_road
 
 
-    def get_next_belief_index(self, current_state, next_state, current_belief, road=["c2","c4", "c6", "c7"]):
+    def get_next_belief_index(self, current_state, next_state, current_belief):
         '''
         return next belief index
         '''
         current_belief_index=int(current_belief[1])
-        if next_state in road:
+        if next_state in self.road:
             return 0
 
         if current_belief_index==0 or current_belief_index==8:
@@ -55,7 +57,7 @@ class BeliefTransition:
     def is_valid_belief_transition(self, state, next_state, current_belief):
 
         next_belief_index=int(next_state[1][1])
-        belief_index=self.get_next_belief_index(state[0], next_state[0], state[1], ["c2","c4", "c6", "c7"])
+        belief_index=self.get_next_belief_index(state[0], next_state[0], state[1])
         if belief_index==next_belief_index :
             return True
         else:
@@ -74,12 +76,11 @@ class BeliefTransition:
 
         return round(prob,2)
 
-    def get_belief_model(self, init_state=('c7','b6')):
+    def get_belief_model(self, init_state):
 
         all_states= self.get_all_other_model_states()
         all_states=sorted(all_states)
         product_states=[(state, belief) for state in all_states for belief in self.belief_sets]
-        # product_states=[state for state in product_states if state[0]!='s7']
         product_states =[ state for state in product_states if state!=init_state]
         product_states.insert(0, init_state)
         all_transitions={}
@@ -117,8 +118,6 @@ class BeliefTransition:
             visited.append(elem)
             all_next_states=self.get_all_next_states(elem[0])
             transition={}
-            if elem==('c3', 'b7'):
-                print("I am inside")
             for state in all_next_states:
                 next_belief_index = self.get_next_belief_index(elem[0], state, elem[1])
                 belief='b'+str(next_belief_index)
@@ -184,7 +183,7 @@ class BeliefTransition:
             index+=1
 
         return new_states
-    def get_complete_MC(self, transition, init=('c1','b6')):
+    def get_complete_MC(self, transition, init):
 
         states=self.get_all_states(transition)
         labels=self.assign_labels(states)
