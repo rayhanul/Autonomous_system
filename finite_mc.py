@@ -5,7 +5,7 @@ from helper import *
 from collections import deque 
 
 class BeliefTransition:
-    def __init__(self, mcs, selected_mc, limit=9, mcs_states=None, discretized_road=["p2","p4", "p6", "p7"], init_belief='b6'):
+    def __init__(self, mcs, selected_mc, limit, discretized_road, mcs_states=None, init_belief='b6'):
         """
         mcs-list of MCs
         """

@@ -2,11 +2,8 @@
 
 mdp
 
+const int N=10;
 
-// Length of Street
-const int N=6;
-
-formula crash = ((a=h) | (a=p) | (h=p));
 formula action = go_action|stop_action;
 formula action2=go_action2|stop_action2;
 
@@ -17,21 +14,36 @@ module autonomous_car
 	stop_action: bool init false;
 	[go] !action -> 1:(go_action'=true);
 	[stop] !action -> 1:(stop_action'=true);
-	[move] (a<N)&go_action -> (a'=a+1)&(go_action'=false);
-	[move] (a<N)&stop_action -> (a'=a)&(stop_action'=false);
-	[] (a=N) -> true;
-	//[move] a=1 ->  1 : (a'=2);
-	//[move] a=1 -> 1 : (a'=1);
-	//[move] a=2 ->  1 : (a'=3);
-//	[move] a=2 -> 1 : (a'=2);
-//	[move] a=3 ->  1 : (a'=4);
-//	[move] a=3 -> 1 : (a'=3);
-//	[move] a=4 ->  1 : (a'=5);
-//	[move] a=4 -> 1 : (a'=4);
-//	[move] a=5 ->  1 : (a'=6);
-//	[move] a=5 -> 1 : (a'=5);
-//	[move] a=6 ->  1 : (a'=6);
-//	[move] a=6 -> 1 : (a'=6);
+
+	//[move] (a=1)&go_action -> (a'=3)&(go_action'=false);
+	//[move] (a=1)&stop_action -> (a'=1)&(stop_action'=false);
+
+	//[move] (a=3)&go_action -> (a'=5)&(go_action'=false);
+	//[move] (a=3)&stop_action -> (a'=3)&(stop_action'=false);
+
+	//[move] (a=5)&go_action -> (a'=7)&(go_action'=false);
+	//[move] (a=5)&stop_action -> (a'=5)&(stop_action'=false);
+
+	//[move] (a=7)&go_action -> (a'=9)&(go_action'=false);
+	//[move] (a=7)&stop_action -> (a'=7)&(stop_action'=false);
+
+	//[] (a=9) -> true;
+
+	[move] (a=1)&go_action -> 0.9: (a'=3)&(go_action'=false) + 0.1: (a'=1)&(go_action'=false);
+	[move] (a=1)&stop_action -> 0.9: (a'=1)&(stop_action'=false)+  0.1: (a'=3)&(stop_action'=false);
+
+	[move] (a=3)&go_action -> 0.9: (a'=5)&(go_action'=false) + 0.1: (a'=3)&(go_action'=false);
+	[move] (a=3)&stop_action -> 0.9: (a'=3)&(stop_action'=false)+  0.1: (a'=5)&(stop_action'=false);
+
+
+	[move] (a=5)&go_action -> 0.9: (a'=7)&(go_action'=false) + 0.1: (a'=5)&(go_action'=false);
+	[move] (a=5)&stop_action -> 0.9: (a'=5)&(stop_action'=false)+  0.1: (a'=7)&(stop_action'=false);
+
+	[move] (a=7)&go_action -> 0.9: (a'=9)&(go_action'=false) + 0.1: (a'=7)&(go_action'=false);
+	[move] (a=7)&stop_action -> 0.9: (a'=7)&(stop_action'=false)+  0.1: (a'=7)&(stop_action'=false);
+
+	[] (a=9) -> true;
+
 endmodule
 
 module human_car 
@@ -40,45 +52,41 @@ module human_car
 	stop_action2: bool init false;
 	[go2] !action2 -> 1:(go_action2'=true);
 	[stop2] !action2 -> 1:(stop_action2'=true);
-	[move] (h<N)&go_action2 -> (h'=h+1)&(go_action2'=false);
-	[move] (h<N)&stop_action2 -> (h'=h)&(stop_action2'=false);
-	[] (h=N) -> true;
 
-//	[go] h=0 ->  1 : (h'=1);
-//	[stop] h=0 -> 1 : (h'=0);
-//	[go] h=1 ->  1 : (h'=2);
-//	[stop] h=1 -> 1 : (h'=1);
-//	[go] h=2 ->  1 : (h'=3);
-//	[stop] h=2 -> 1 : (h'=2);
-//	[go] h=3 ->  1 : (h'=4);
-//	[stop] h=3 -> 1 : (h'=3);
-//	[go] h=4 ->  1 : (h'=5);
-//	[stop] h=4 -> 1 : (h'=4);
-//	[go] h=5 ->  1 : (h'=6);
-//	[stop] h=5 -> 1 : (h'=5);
-//	[go] h=6 ->  1 : (h'=6);
-//	[stop] h=6 -> 1 : (h'=6);
+	[move] (h=0)&go_action2 -> (h'=1)&(go_action2'=false);
+	[move] (h=0)&stop_action2 -> (h'=0)&(stop_action2'=false);
+
+	[move] (h=1)&go_action2 -> (h'=3)&(go_action2'=false);
+	[move] (h=1)&stop_action2 -> (h'=1)&(stop_action2'=false);
+
+	[move] (h=3)&go_action2 -> (h'=5)&(go_action2'=false);
+	[move] (h=3)&stop_action2 -> (h'=3)&(stop_action2'=false);
+
+	[move] (h=5)&go_action2 -> (h'=7)&(go_action2'=false);
+	[move] (h=5)&stop_action2 -> (h'=5)&(stop_action2'=false);
+
+	[move] (h=7)&go_action2 -> (h'=9)&(go_action2'=false);
+	[move] (h=7)&stop_action2 -> (h'=7)&(stop_action2'=false);
+
+	[] (h=9) -> true;
 
 endmodule
 
 
 label "a1" = (a=1);
-label "a2" = (a=2);
 label "a3" = (a=3);
-label "a4" = (a=4);
 label "a5" = (a=5);
-label "a6" = (a=6);
+label "a7" = (a=7);
+label "a9" = (a=9);
 
 label "h0" = (h=0);
 label "h1" = (h=1);
-label "h2" = (h=2);
 label "h3" = (h=3);
-label "h4" = (h=4);
 label "h5" = (h=5);
-label "h6" = (h=6);
+label "h7" = (h=7);
+label "h9" = (h=9);
 
-label "crash" = (crash=true); 
-label "goal" = (a=6);
+label "goal" = (a=9) | (h=9);
 
 label "go1" = go_action;
 label "stop1" = stop_action;

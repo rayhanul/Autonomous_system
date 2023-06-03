@@ -43,7 +43,7 @@ class Analyzer:
             file.write(program)
 
     def create_combined_model(self, addinational_text):
-        path=os.path.join(self.model_path, 'template_model_2.txt')
+        path=os.path.join(self.model_path, 'template_model.txt')
         with open(path, 'r') as source_file:
             content = source_file.read()
         path=os.path.join(self.model_path, 'final_combined_model.nm')
@@ -56,56 +56,161 @@ class Analyzer:
     def get_probability_satisfying_property(self, property):
         out_path= os.path.join(self.model_path, 'out_final_combined_model.nm')
         composed_model=self.get_composed_model()
-        print(composed_model)
+        # print(composed_model)
         result, policy = stormpy_int.model_checking(composed_model, property, out_path, True)
 
         for state in composed_model.states:
             label=composed_model.states[state]["ap"]
-            print(f"  State {state}, with labels {label}, Pr = {result[state]}")
+            # print(f"  State {state}, with labels {label}, Pr = {result[state]}")
+
+    def is_crush_exist(self, labels):
+        # condition to be crush = 3, 5, 7
+        for label in labels:
+            if 'a' in label:
+                autonomous_state = label
+            elif 'h' in label:
+                humand_car_state = label
+            elif 'p' in label and not 'stop' in label:
+                pedestrian_state = label
+        if autonomous_state[1] == humand_car_state[1]:
+            return True
+
+        if autonomous_state[1] == pedestrian_state[1]:
+            return True 
+        return False 
+        
+def get_policies(analyzer, model, result):
+    Agent1_pol = dict()
+    Agent2_pol = dict()
+
+    move_ids = [m_s.id for m_s in model.states for s_i in m_s.labels if 'go' in s_i or 'stop' in s_i]
+
+    action_points = set(range(model.nr_states)) - set(move_ids)
+    actions1 = ['go1','stop1']
+    actions2 = ['go2','stop2']
+
+    for s_i in action_points:
+        print(model.states[s_i].labels)
+        for l_i in model.states[s_i].labels:
+            if 'a' in l_i and not 'crash' in l_i:
+                s_state = l_i
+            elif 'h' in l_i:
+                x_state = l_i
+            elif 'p' in l_i:
+                p_state = l_i
+        deterministic_choice=result.scheduler.get_choice(s_i).get_deterministic_choice()
+        if deterministic_choice==1:
+            print("I am at stop")
+        transition_at_s_i = model.states[s_i].actions[deterministic_choice].transitions
+        hold_state = model.states[int(re.findall('\\d+',str(transition_at_s_i))[0])]
+        print(model.states[s_i].labels)
+        next_action = result.scheduler.get_choice(hold_state).get_deterministic_choice()
+        if next_action==1:
+            print("I am selecting stop")
+        if next_action==0:
+            print("I am here")
+        next_state = model.states[int(re.findall('\\d+', str(hold_state.actions[int(next_action)].transitions))[0])]
+        print(next_state)
+        # if 'crash' not in next_state.labels and 'goal' not in next_state.labels:
+        text= not analyzer.is_crush_exist(next_state.labels)
+        print(text)
+        if not analyzer.is_crush_exist(next_state.labels) and 'goal' not in next_state.labels:
+            act_tup = tuple()
+            act_tup += ([l_ind for l_ind,l_a in enumerate(actions1) if l_a in next_state.labels][0],)
+            act_tup += ([l_ind for l_ind,l_a in enumerate(actions2) if l_a in next_state.labels][0],)
+            Agent1_pol.update({(s_state, x_state, p_state): act_tup[1] })
+
+
+        hold_state2 = model.states[int(re.findall('\\d+', str(model.states[s_i].actions[result.scheduler.get_choice(s_i).get_deterministic_choice()].transitions))[0])]
+        next_action2 = result.scheduler.get_choice(hold_state2).get_deterministic_choice()
+        next_state2 = model.states[int(re.findall('\\d+', str(hold_state2.actions[int(next_action2)].transitions))[0])]
+        if not analyzer.is_crush_exist(next_state2.labels) and 'goal' not in next_state2.labels:
+            act_tup2 = tuple()
+            act_tup2 += ([l_ind for l_ind,l_a in enumerate(actions1) if l_a in next_state2.labels][0],)
+            act_tup2 += ([l_ind for l_ind,l_a in enumerate(actions2) if l_a in next_state2.labels][0],)
+            Agent2_pol.update({(s_state,x_state,p_state):act_tup2[0]})
+    return Agent1_pol, Agent2_pol
+
+def create_dtmc_model_using_policies(analyzer, Agent1_pol, Agent2_pol):
+    tc_dtmc = "two_car_dtmc.prism"
+    tc_dtmc = os.path.join(analyzer.model_path, tc_dtmc)
+    template= os.path.join(analyzer.model_path, "template_dtmc.txt")
+    with open(template) as f:
+        with open(tc_dtmc, "w+") as f1:
+            for line in f:
+                f1.write(line)
+
+    # dtmc_file = open(tc_dtmc,"a+")
+
+    with open(tc_dtmc, 'a+') as dtmc_file:
+        # dtmc_file.write("module car1policy\n\tc1_go1 : bool init false;\n\tc1_stop1 : bool init false;\n\n\t[go] c1_go1 -> 1:(c1_go1'=false);\n\t[stop] c1_stop1 -> 1:(c1_stop1'=false);\n")
+        # pol1_lead = "\t[assign] !carpol1 &"
+        # out1_ind = ["(c1_go1'=true);\n","(c1_stop1'=true);\n"]
+        # for s_z,x,p in Agent2_pol:
+        #     s_num = int(s_z[1:])
+        #     x_num = int(x[1:])
+        #     p_num = int(p[1:])
+        #     state_in = "(a={}) & (h={}) & (p={}) -> ".format(s_num,x_num,p_num)
+        #     pol_ind = 0 if Agent1_pol[(s_z,x,p)] == int(0) else 1
+        #     dtmc_file.write(pol1_lead+state_in+out1_ind[pol_ind])
+        # dtmc_file.write('endmodule\n')
+        dtmc_file.write("module car1policy\n\tc1_go1 : bool init false;\n\tc1_stop1 : bool init false;\n\n\t[go] c1_go1 -> 1:(c1_go1'=false);\n\t[stop] c1_stop1 -> 1:(c1_stop1'=false);\n")
+        pol1_lead = "\t[assign] !carpol1 &"
+        out1_ind = ["(c1_go1'=true);\n","(c1_stop1'=true);\n"]
+
+        for s_z, x, p in Agent1_pol:
+            s_num = int(s_z[1:])
+            x_num = int(x[1:])
+            p_num = int(p[1:])
+
+            state_in = "(a={}) & (h={}) & (p={}) -> ".format(s_num, x_num, p_num)
+            pol_ind = 0 if Agent1_pol[(s_z, x, p)] == int(0) else 1
+            dtmc_file.write(pol1_lead + state_in + out1_ind[pol_ind])
+
+        dtmc_file.write('endmodule\n')
+
+                # dtmc_file.write("module car2policy\n\tc2_go2 : bool init false;\n\tc2_stop2 : bool init false;\n\n\t[go2] c2_go2 -> 1:(c2_go2'=false);\n\t[stop2] c2_stop2 -> 1:(c2_stop2'=false);\n")
+        # pol2_lead = "\t[assign] !carpol2 &"
+        # out2_ind = ["(c2_go2'=true);\n", "(c2_stop2'=true);\n"]
+
+        # for s_z, x, p in Agent2_pol:
+        #     s_num = int(s_z[1:])
+        #     x_num = int(x[1:])
+        #     p_num = int(p[1:])
+
+        #     state_in = "(a={}) & (h={}) & (p={}) -> ".format(s_num, x_num, p_num)
+        #     pol_ind = 0 if Agent2_pol[(s_z, x, p)] == int(0) else 1
+        #     dtmc_file.write(pol2_lead + state_in + out2_ind[pol_ind])
+
+        # dtmc_file.write('endmodule\n')
+
+
 
 if __name__=="__main__":
 
-    # p, q, r = generate_pqr()
 
-    # mc_2_transition={
-    #     "p7":{"p3":.90, "p7":.08, "p8":.02},
-    #     "p3": {"p10":1}, 
-    #     "p4": {"p10":1}, 
-    #     "p5": {"p10":1}, 
-    #     "p8":{"p8": .30, "p4": .60, "p9":.05, "p7":.05},
-    #     "p9":{"p5":.6, "p9":.3, "p8":.1},
-    #     "p10":{"p10":1}
-    # }
-
-    # mc_1_transition={
-    #     "p7":{"p8":.6, "p7":.4},
-    #     "p8":{"p8": .4, "p7": .3, "s9":.3},
-    #     "p9":{"p9":.4, "p8":.6}
-    # }
     mc_2_transition={
-        "p1":{"p2":.60, "p1":.3, "p3":.1},
-        "p2": {"p7":1}, 
-        "p7": {"p7":1}, 
-        "p3": {"p3":.3, "p1":0.05, "p4":.6, "p5":.05}, 
-        "p4":{"p7": 1},
-        "p5":{"p5":.3, "p6":.6, "p3":.1},
-        "p6":{"p7":1}
+        "p2":{"p3":.6, "p2":.3, "p4":.1},
+        "p3": {"p8":1}, 
+        "p8": {"p8":1}, 
+        "p4": {"p4":.3, "p2":0.05, "p5":.6, "p6":.05}, 
+        "p5":{"p8": 1},
+        "p6":{"p6":.3, "p7":.6, "p4":.1},
+        "p7":{"p8":1}
     }
+
 
     mc_1_transition={
-        "p1":{"p3":.6, "p1":.4},
-        "p3":{"p3": .3, "p5": .35, "p1":.35},
-        "p5":{"p5":.7, "p3":.3}
+        "p2":{"p4":.6, "p2":.4},
+        "p4":{"p4": .3, "p6": .35, "p2":.35},
+        "p6":{"p6":.7, "p4":.3}
     }
-    mc_1=MC(init="p1", transitions=mc_1_transition, states=["p1", "p3", "p5"], labels={"p1":1, "p3":3, "p5":5})
-    mc_2=MC(init="p1", transitions=mc_2_transition, states=["p1", "p2", "p3", "p4", "p5", "p6", "p7"], labels={"p1":1, "p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7})
-    
-    # mc_1=MC(init="p7", transitions=mc_1_transition, states=["p7", "p3", "p4", "p10", "p7", "p8", "p9"], labels={"p3":3, "p4":4, "p10":10, "p6":6, "p7":7, "p8":8, "p9":9})
-    # mc_2=MC(init="p7", transitions=mc_2_transition, states=["p7", "p8", "p9"], labels={ "p9":9, "p8":8, "p7":7})
-    
+    mc_1=MC(init="p2", transitions=mc_1_transition, states=["p2", "p4", "p6"], labels={"p2":2, "p4":4, "p6":6})
+    mc_2=MC(init="p2", transitions=mc_2_transition, states=["p2", "p3", "p4", "p5", "p6", "p7", "p8"], labels={"p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7, "p8":8})
+   
+   
 
-
-    b_transition=BeliefTransition(mcs=[mc_1, mc_2], selected_mc= 1,  limit=9, discretized_road=["p2","p4", "p6", "p7"] )
+    b_transition=BeliefTransition(mcs=[mc_1, mc_2], selected_mc= 1,  limit=9, discretized_road=["p3","p5", "p7", "p8"] )
 
     b3=b_transition.get_complete_environment_model(b_transition.initial_belief_state)
     print(b3)
@@ -129,7 +234,8 @@ if __name__=="__main__":
 
 
     print("composed done") 
-    property_tobe_verfied='Pmax=?[!(("a2" & "p2") | ("a4" & "p4") | ("a6" & "p6")) U "goal"]'
+    # property_tobe_verfied='Pmax=?[!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7")) U "goal"]'
+    property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7"))) U "goal"]'
     path=os.path.join(analyzer.model_path, 'final_combined_model.nm')
 
     # analyzer.get_probability_satisfying_property(property_tobe_verfied)
@@ -137,7 +243,6 @@ if __name__=="__main__":
 
     prism_program=stormpy.parse_prism_program(path)
     properties=stormpy.parse_properties(property_tobe_verfied, prism_program)
-    # model=stormpy.build_sparse_exact_model_with_options(prism_program, options)
     model=stormpy.build_sparse_model(prism_program)
 
     print(f'number of states : {model.nr_states}, ')
@@ -148,57 +253,22 @@ if __name__=="__main__":
     initial_state=model.initial_states[0]
     print("result at initial state: {0}".format(result.at(initial_state)))
 
-    # print(result.scheduler.get_choice(0).get_deterministic_choice())
+    print(result.scheduler.get_choice(0).get_deterministic_choice())
 
-    # Agent1_pol = dict()
-    # move_ids = [m_s.id for m_s in model.states for s_i in m_s.labels if 'go' in s_i or 'stop' in s_i]
+    Agent1_pol, Agent2_pol = get_policies(analyzer, model, result)
 
-    # action_points = set(range(model.nr_states)) - set(move_ids)
-    # actions1 = ['go1','stop1']
     
-    # # for index in range(model.nr_states):
-    # #     print(model.states[index].labels)
-
-    # for s_i in action_points:
-    #     print(model.states[s_i].labels)
-    #     for l_i in model.states[s_i].labels:
-    #         if 'a' in l_i and not 'crash' in l_i:
-    #             s_state = l_i
-    #         elif 'h' in l_i:
-    #             x_state = l_i
-    #         elif 'c' in l_i:
-    #             p_state = l_i
-    #     deterministic_choice=result.scheduler.get_choice(s_i).get_deterministic_choice()
-    #     transition_at_s_i = model.states[s_i].actions[deterministic_choice].transitions
-    #     hold_state = model.states[int(re.findall('\\d+',str(transition_at_s_i))[0])]
-    #     next_action = result.scheduler.get_choice(hold_state).get_deterministic_choice()
-    #     next_state = model.states[int(re.findall('\\d+', str(hold_state.actions[int(next_action)].transitions))[0])]
-
-    #     if 'crash' not in next_state.labels and 'goal' not in next_state.labels:
-    #         act_tup = tuple()
-    #         act_tup += ([l_ind for l_ind,l_a in enumerate(actions1) if l_a in next_state.labels][0],)
-    #         action_index=act_tup[0]
-    #         action_name=actions1[action_index]
-    #         Agent1_pol.update({(s_state, x_state, p_state): action_name })
+    create_dtmc_model_using_policies(analyzer, Agent1_pol, Agent2_pol)
 
 
-    # with open('policy.txt', 'w') as policy_file:
-    #     for key, value in Agent1_pol.items():
-    #         print(f'state label : {key}, and action : {value}\n')
-    #         policy_file.write(f'state label : {key}, and action : {value}\n')
-
-
-    # composed_model=analyzer.get_composed_model()
-    # properties = stormpy.parse_properties_for_prism_program(property_tobe_verfied, composed_model)
-    # model = stormpy.build_parametric_model(composed_model)
-    # result=stormpy.model_checking(model, properties, False, True) 
-    
-
-
-
-    # analyzer.get_probability_satisfying_property(property_tobe_verfied)
-
-
+    dtmc_model_path=os.path.join(analyzer.model_path, 'two_car_dtmc.prism')
+    prism_program=stormpy.parse_prism_program(dtmc_model_path)
+    properties=stormpy.parse_properties(property_tobe_verfied, prism_program)
+    model=stormpy.build_sparse_model(prism_program)
+    print(f'number of states : {model.nr_states}, ')
+    result=stormpy.model_checking(model, properties[0], only_initial_states=False, extract_scheduler=True) 
+    initial_state=model.initial_states[0]
+    print("result at initial state: {0}".format(result.at(initial_state)))
 
 
 
