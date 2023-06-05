@@ -10,6 +10,8 @@ from tulip.interfaces import stormpy as stormpy_int
 from tulip.transys.compositions import synchronous_parallel
 import stormpy 
 
+import matplotlib.pyplot as plt 
+import time 
 
 class Analyzer:
 
@@ -90,7 +92,7 @@ def get_policies(analyzer, model, result):
     actions2 = ['go2','stop2']
 
     for s_i in action_points:
-        print(model.states[s_i].labels)
+        # print(model.states[s_i].labels)
         for l_i in model.states[s_i].labels:
             if 'a' in l_i and not 'crash' in l_i:
                 s_state = l_i
@@ -99,21 +101,15 @@ def get_policies(analyzer, model, result):
             elif 'p' in l_i:
                 p_state = l_i
         deterministic_choice=result.scheduler.get_choice(s_i).get_deterministic_choice()
-        if deterministic_choice==1:
-            print("I am at stop")
         transition_at_s_i = model.states[s_i].actions[deterministic_choice].transitions
         hold_state = model.states[int(re.findall('\\d+',str(transition_at_s_i))[0])]
-        print(model.states[s_i].labels)
+        # print(model.states[s_i].labels)
         next_action = result.scheduler.get_choice(hold_state).get_deterministic_choice()
-        if next_action==1:
-            print("I am selecting stop")
-        if next_action==0:
-            print("I am here")
         next_state = model.states[int(re.findall('\\d+', str(hold_state.actions[int(next_action)].transitions))[0])]
-        print(next_state)
+        # print(next_state)
         # if 'crash' not in next_state.labels and 'goal' not in next_state.labels:
         text= not analyzer.is_crush_exist(next_state.labels)
-        print(text)
+        # print(text)
         if not analyzer.is_crush_exist(next_state.labels) and 'goal' not in next_state.labels:
             act_tup = tuple()
             act_tup += ([l_ind for l_ind,l_a in enumerate(actions1) if l_a in next_state.labels][0],)
@@ -188,101 +184,148 @@ def create_dtmc_model_using_policies(analyzer, Agent1_pol, Agent2_pol):
 
 if __name__=="__main__":
 
-
-    mc_2_transition={
-        "p2":{"p3":.6, "p2":.3, "p4":.1},
-        "p3": {"p8":1}, 
-        "p8": {"p8":1}, 
-        "p4": {"p4":.3, "p2":0.05, "p5":.6, "p6":.05}, 
-        "p5":{"p8": 1},
-        "p6":{"p6":.3, "p7":.6, "p4":.1},
-        "p7":{"p8":1}
-    }
-
-
-    mc_1_transition={
-        "p2":{"p4":.6, "p2":.4},
-        "p4":{"p4": .3, "p6": .35, "p2":.35},
-        "p6":{"p6":.7, "p4":.3}
-    }
-    mc_1=MC(init="p2", transitions=mc_1_transition, states=["p2", "p4", "p6"], labels={"p2":2, "p4":4, "p6":6})
-    mc_2=MC(init="p2", transitions=mc_2_transition, states=["p2", "p3", "p4", "p5", "p6", "p7", "p8"], labels={"p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7, "p8":8})
-   
-   
-
-    b_transition=BeliefTransition(mcs=[mc_1, mc_2], selected_mc= 1,  limit=9, discretized_road=["p3","p5", "p7", "p8"] )
-
-    b3=b_transition.get_complete_environment_model(b_transition.initial_belief_state)
-    print(b3)
-    # b1=b_transition.get_belief_model()
-    # # b3=b_transition.remove_unreachable_states(b1)
-    # b3=b_transition.get_normalized_transition(b1)
-
-
-    old_states, b3=b_transition.get_complete_MC(b3, b_transition.initial_belief_state )
-    prism_model_generator=Prism_Model_Generator(b3, old_states)
-    environment_prism_model=prism_model_generator.get_prism_model()
+    numiter=100
+    counterarray= [0 for _ in range(numiter)]
+    data_out = dict()
     
-
-
-
-    analyzer=Analyzer()
-
-    analyzer.writeToFile(environment_prism_model, "env_model.nm")
-    # analyzer.create_composed_model(environment_prism_model)
-    analyzer.create_combined_model(environment_prism_model)
-
-
-    print("composed done") 
-    # property_tobe_verfied='Pmax=?[!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7")) U "goal"]'
-    property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7"))) U "goal"]'
-    path=os.path.join(analyzer.model_path, 'final_combined_model.nm')
-
-    # analyzer.get_probability_satisfying_property(property_tobe_verfied)
-
-
-    prism_program=stormpy.parse_prism_program(path)
-    properties=stormpy.parse_properties(property_tobe_verfied, prism_program)
-    model=stormpy.build_sparse_model(prism_program)
-
-    print(f'number of states : {model.nr_states}, ')
-
-    result=stormpy.model_checking(model, properties[0], only_initial_states=False, extract_scheduler=True) 
-
-    # result ...
-    initial_state=model.initial_states[0]
-    print("result at initial state: {0}".format(result.at(initial_state)))
-
-    print(result.scheduler.get_choice(0).get_deterministic_choice())
-
-    Agent1_pol, Agent2_pol = get_policies(analyzer, model, result)
-
-    
-    create_dtmc_model_using_policies(analyzer, Agent1_pol, Agent2_pol)
-
-
-    dtmc_model_path=os.path.join(analyzer.model_path, 'two_car_dtmc.prism')
-    prism_program=stormpy.parse_prism_program(dtmc_model_path)
-    properties=stormpy.parse_properties(property_tobe_verfied, prism_program)
-    model=stormpy.build_sparse_model(prism_program)
-    print(f'number of states : {model.nr_states}, ')
-    result=stormpy.model_checking(model, properties[0], only_initial_states=False, extract_scheduler=True) 
-    initial_state=model.initial_states[0]
-    print("result at initial state: {0}".format(result.at(initial_state)))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
+    for iter in range(0,numiter):
+        p, q, r = generate_pqr()
         
+
+        mc_2_transition={
+            "p2":{"p3":p, "p2":q, "p4":r},
+            "p3": {"p8":1}, 
+            "p8": {"p8":1}, 
+            "p4": {"p4":.3, "p2":0.05, "p5":.6, "p6":.05}, 
+            "p5":{"p8": 1},
+            "p6":{"p6":.3, "p7":.6, "p4":.1},
+            "p7":{"p8":1}
+        }
+        p, q = generate_pq()
+        mc_1_transition={
+            "p2":{"p4":p, "p2":q},
+            "p4":{"p4": .3, "p6": .35, "p2":.35},
+            "p6":{"p6":.7, "p4":.3}
+        }
+
+
+        # mc_2_transition={
+        #     "p2":{"p3":p, "p2":q, "p4":r},
+        #     "p3": {"p8":1}, 
+        #     "p8": {"p8":1}, 
+        #     "p4": {"p4":.3, "p2":0.05, "p5":.6, "p6":.05}, 
+        #     "p5":{"p8": 1},
+        #     "p6":{"p6":.3, "p7":.6, "p4":.1},
+        #     "p7":{"p8":1}
+        # }
+        # mc_1_transition={
+        #     "p2":{"p3":p, "p2":q},
+        #     "p3":{"p8": 1},
+        #     "p8":{"p8":1 }
+        # }
+
+        # mc_1=MC(init="p2", transitions=mc_1_transition, states=["p2", "p3", "p8"], labels={"p2":2, "p3":3, "p8":8})
+
+        mc_1=MC(init="p2", transitions=mc_1_transition, states=["p2", "p4", "p6"], labels={"p2":2, "p4":4, "p6":6})
+        mc_2=MC(init="p2", transitions=mc_2_transition, states=["p2", "p3", "p4", "p5", "p6", "p7", "p8"], labels={"p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7, "p8":8})
+    
+    
+
+        b_transition=BeliefTransition(mcs=[mc_1, mc_2], selected_mc= 1,  limit=9, discretized_road=["p3","p5", "p7", "p8"] )
+
+        b3=b_transition.get_complete_environment_model(b_transition.initial_belief_state)
+        # print(b3)
+        # b1=b_transition.get_belief_model()                
+        # # b3=b_transition.remove_unreachable_states(b1)
+        # b3=b_transition.get_normalized_transition(b1)
+
+
+        old_states, b3=b_transition.get_complete_MC(b3, b_transition.initial_belief_state )
+        prism_model_generator=Prism_Model_Generator(b3, old_states)
+        environment_prism_model=prism_model_generator.get_prism_model()
+        
+
+
+
+        analyzer=Analyzer()
+
+        analyzer.writeToFile(environment_prism_model, "env_model.nm")
+        # analyzer.create_composed_model(environment_prism_model)
+        analyzer.create_combined_model(environment_prism_model)
+
+
+        # print("composed done") 
+        # property_tobe_verfied='Pmax=?[!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7")) U "goal"]'
+        property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7"))) U "goal"]'
+        path=os.path.join(analyzer.model_path, 'final_combined_model.nm')
+
+        # analyzer.get_probability_satisfying_property(property_tobe_verfied)
+
+
+        prism_program=stormpy.parse_prism_program(path)
+        properties=stormpy.parse_properties(property_tobe_verfied, prism_program)
+        model=stormpy.build_sparse_model(prism_program)
+
+        # print(f'number of states : {model.nr_states}, ')
+
+        result=stormpy.model_checking(model, properties[0], only_initial_states=False, extract_scheduler=True) 
+
+        # result ...
+        initial_state=model.initial_states[0]
+
+        belief_model_prob=result.at(initial_state)
+
+        print("result at initial state: {0}".format(result.at(initial_state)))
+
+        # print(result.scheduler.get_choice(0).get_deterministic_choice())
+
+        Agent1_pol, Agent2_pol = get_policies(analyzer, model, result)
+
+        
+        create_dtmc_model_using_policies(analyzer, Agent1_pol, Agent2_pol)
+
+
+        dtmc_model_path=os.path.join(analyzer.model_path, 'two_car_dtmc.prism')
+        prism_program=stormpy.parse_prism_program(dtmc_model_path)
+        properties=stormpy.parse_properties(property_tobe_verfied, prism_program)
+        model=stormpy.build_sparse_model(prism_program)
+        # print(f'number of states : {model.nr_states}, ')
+        result=stormpy.model_checking(model, properties[0], only_initial_states=False, extract_scheduler=True) 
+        initial_state=model.initial_states[0]
+        original_model_prob=result.at(initial_state)
+
+        print("result at initial state: {0}".format(result.at(initial_state)))
+
+        data_out.update({(iter, belief_model_prob): original_model_prob})
+
+    index=[i for i in range(0, len(data_out))]
+    fig = plt.figure()
+    ax = plt.axes()
+    xline = []
+    yline = []
+    for data in data_out: 
+        xline.append(data[1])
+        yline.append(data_out[data])
+    
+
+    plt.plot(index, xline, label="prob. based on belief model", linestyle="-")
+    plt.plot(index, yline, label="prob. after applying policies", linestyle="--")
+    plt.legend()
+    plt.show()
+
+    # name='porbability'+str(int(time.time()))+'.png'
+
+    # plt.savefig(name)
+
+
+
+
+
+
+
+
+
+
+
+
+
