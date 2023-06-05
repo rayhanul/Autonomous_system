@@ -234,10 +234,6 @@ if __name__=="__main__":
         b_transition=BeliefTransition(mcs=[mc_1, mc_2], selected_mc= 1,  limit=9, discretized_road=["p3","p5", "p7", "p8"] )
 
         b3=b_transition.get_complete_environment_model(b_transition.initial_belief_state)
-        # print(b3)
-        # b1=b_transition.get_belief_model()                
-        # # b3=b_transition.remove_unreachable_states(b1)
-        # b3=b_transition.get_normalized_transition(b1)
 
 
         old_states, b3=b_transition.get_complete_MC(b3, b_transition.initial_belief_state )
@@ -259,14 +255,9 @@ if __name__=="__main__":
         property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7"))) U "goal"]'
         path=os.path.join(analyzer.model_path, 'final_combined_model.nm')
 
-        # analyzer.get_probability_satisfying_property(property_tobe_verfied)
-
-
         prism_program=stormpy.parse_prism_program(path)
         properties=stormpy.parse_properties(property_tobe_verfied, prism_program)
         model=stormpy.build_sparse_model(prism_program)
-
-        # print(f'number of states : {model.nr_states}, ')
 
         result=stormpy.model_checking(model, properties[0], only_initial_states=False, extract_scheduler=True) 
 
@@ -275,7 +266,7 @@ if __name__=="__main__":
 
         belief_model_prob=result.at(initial_state)
 
-        print("result at initial state: {0}".format(result.at(initial_state)))
+        # print("result at initial state: {0}".format(result.at(initial_state)))
 
         # print(result.scheduler.get_choice(0).get_deterministic_choice())
 
@@ -289,12 +280,11 @@ if __name__=="__main__":
         prism_program=stormpy.parse_prism_program(dtmc_model_path)
         properties=stormpy.parse_properties(property_tobe_verfied, prism_program)
         model=stormpy.build_sparse_model(prism_program)
-        # print(f'number of states : {model.nr_states}, ')
         result=stormpy.model_checking(model, properties[0], only_initial_states=False, extract_scheduler=True) 
         initial_state=model.initial_states[0]
         original_model_prob=result.at(initial_state)
 
-        print("result at initial state: {0}".format(result.at(initial_state)))
+        print(f"result at iteration: {iter}, belief model prob. {belief_model_prob}, original prob after applying policies: {original_model_prob}")
 
         data_out.update({(iter, belief_model_prob): original_model_prob})
 
