@@ -1,0 +1,54 @@
+
+
+mdp
+
+const int N=10;
+
+formula action = go_action|stop_action;
+
+
+
+module autonomous_car
+	a : [1..N] init 1;
+	go_action : bool init false;
+	stop_action: bool init false;
+	[go] !action -> 1:(go_action'=true);
+	[stop] !action -> 1:(stop_action'=true);
+
+	[move] (a=1)&go_action -> 0.9: (a'=3)&(go_action'=false) + 0.1: (a'=1)&(go_action'=false);
+	[move] (a=1)&stop_action -> 0.9: (a'=1)&(stop_action'=false)+  0.1: (a'=3)&(stop_action'=false);
+
+	[move] (a=3)&go_action -> 0.9: (a'=5)&(go_action'=false) + 0.1: (a'=3)&(go_action'=false);
+	[move] (a=3)&stop_action -> 0.9: (a'=3)&(stop_action'=false)+  0.1: (a'=5)&(stop_action'=false);
+
+
+	[move] (a=5)&go_action -> 0.9: (a'=7)&(go_action'=false) + 0.1: (a'=5)&(go_action'=false);
+	[move] (a=5)&stop_action -> 0.9: (a'=5)&(stop_action'=false)+  0.1: (a'=7)&(stop_action'=false);
+
+	[move] (a=7)&go_action -> 0.9: (a'=9)&(go_action'=false) + 0.1: (a'=7)&(go_action'=false);
+	[move] (a=7)&stop_action -> 0.9: (a'=7)&(stop_action'=false)+  0.1: (a'=7)&(stop_action'=false);
+
+	[] (a=9) -> true;
+
+endmodule
+
+
+
+label "a1" = (a=1);
+label "a3" = (a=3);
+label "a5" = (a=5);
+label "a7" = (a=7);
+label "a9" = (a=9);
+
+
+label "goal" = (a=9) ;
+
+label "go1" = go_action;
+label "stop1" = stop_action;
+
+
+
+
+
+
+
