@@ -5,7 +5,6 @@ dtmc
 // Length of Street
 const int N=10;
 
-//formula crash = ((a=h) | (a=p) | (h=p));
 formula action = go_action|stop_action;
 formula action2=go_action2|stop_action2;
 formula carpol1 = c1_go1|c1_stop1;
@@ -22,23 +21,6 @@ module autonomous_car
 
 	[go] !action& !assign_flag -> 1:(go_action'=true);
 	[stop] !action & !assign_flag -> 1:(stop_action'=true);
-    
-	//[go] !action & !assign_flag -> 1:(go_action'=true) & (assign_flag'=true);
-	//[stop] !action & !assign_flag -> 1:(stop_action'=true) & (assign_flag'=true);
-
-//	[move] (a=1)&go_action -> (a'=3)&(go_action'=false) & (assign_flag'=true);
-//	[move] (a=1)&stop_action -> (a'=1)&(stop_action'=false) & (assign_flag'=true);
-
-//	[move] (a=3)&go_action -> (a'=5)&(go_action'=false) & (assign_flag'=true);
-//	[move] (a=3)&stop_action -> (a'=3)&(stop_action'=false) & (assign_flag'=true);
-
-//	[move] (a=5)&go_action -> (a'=7)&(go_action'=false) & (assign_flag'=true);
-//	[move] (a=5)&stop_action -> (a'=5)&(stop_action'=false) & (assign_flag'=true);
-
-//	[move] (a=7)&go_action -> (a'=9)&(go_action'=false) & (assign_flag'=true);
-//	[move] (a=7)&stop_action -> (a'=7)&(stop_action'=false) & (assign_flag'=true);
-
-//	[] (a=9) -> true;
 
 	[move] (a=1)&go_action -> 0.9: (a'=3)&(go_action'=false) & (assign_flag'=true) + 0.1: (a'=1)&(go_action'=false) & (assign_flag'=true);
 	[move] (a=1)&stop_action -> 0.9: (a'=1)&(stop_action'=false) & (assign_flag'=true)+  0.1: (a'=3)&(stop_action'=false) & (assign_flag'=true);
@@ -68,23 +50,6 @@ module human_car
 	[assign] assign_flag2 -> (assign_flag2'=false);
 	[go2] !action2 & !assign_flag2 -> 1:(go_action2'=true);
 	[stop2] !action2 & !assign_flag2 -> 1:(stop_action2'=true);
-
-	//[move] (h=0)&go_action2 -> (h'=1)&(go_action2'=false) & (assign_flag2'=true);
-	//[move] (h=0)&stop_action2 -> (h'=0)&(stop_action2'=false) & (assign_flag2'=true);
-
-	//[move] (h=1)&go_action2 -> (h'=3)&(go_action2'=false) & (assign_flag2'=true);
-	//[move] (h=1)&stop_action2 -> (h'=1)&(stop_action2'=false) & (assign_flag2'=true);
-
-	//[move] (h=3)&go_action2 -> (h'=5)&(go_action2'=false) & (assign_flag2'=true);
-	//[move] (h=3)&stop_action2 -> (h'=3)&(stop_action2'=false) & (assign_flag2'=true);
-
-	//[move] (h=5)&go_action2 -> (h'=7)&(go_action2'=false) & (assign_flag2'=true);
-	//[move] (h=5)&stop_action2 -> (h'=5)&(stop_action2'=false) & (assign_flag2'=true);
-
-	//[move] (h=7)&go_action2 -> (h'=9)&(go_action2'=false) & (assign_flag2'=true);
-	//[move] (h=7)&stop_action2 -> (h'=7)&(stop_action2'=false) & (assign_flag2'=true);
-
-	//[] (h=9) -> true;
 
 
 	[move] (h=0)&go_action2 -> 0.9: (h'=1)&(go_action2'=false) & (assign_flag2'=true)+ 0.1: (h'=0)&(go_action2'=false) & (assign_flag2'=true);
@@ -138,7 +103,6 @@ label "h5" = (h=5);
 label "h7" = (h=7);
 label "h9" = (h=9);
 
-//label "crash" = (crash=true); 
 label "goal" = (a=9) | (h=9);
 
 label "go1" = go_action;
@@ -158,7 +122,7 @@ label "p8" = (p=8) ; module car1policy
 
 	[go] c1_go1 -> 1:(c1_go1'=false);
 	[stop] c1_stop1 -> 1:(c1_stop1'=false);
-	[assign] !carpol1 &(a=1) & (h=0) & (p=2) -> (c1_go1'=true);
+	[assign] !carpol1 &(a=1) & (h=0) & (p=2) -> (c1_stop1'=true);
 	[assign] !carpol1 &(a=3) & (h=1) & (p=2) -> (c1_go1'=true);
 	[assign] !carpol1 &(a=3) & (h=1) & (p=4) -> (c1_stop1'=true);
 	[assign] !carpol1 &(a=3) & (h=0) & (p=2) -> (c1_go1'=true);
@@ -264,7 +228,7 @@ module car2policy
 
 	[go2] c2_go2 -> 1:(c2_go2'=false);
 	[stop2] c2_stop2 -> 1:(c2_stop2'=false);
-	[assign] !carpol2 &(a=1) & (h=0) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(a=1) & (h=0) & (p=2) -> (c2_stop2'=true);
 	[assign] !carpol2 &(a=3) & (h=1) & (p=2) -> (c2_go2'=true);
 	[assign] !carpol2 &(a=3) & (h=1) & (p=4) -> (c2_stop2'=true);
 	[assign] !carpol2 &(a=3) & (h=0) & (p=2) -> (c2_go2'=true);

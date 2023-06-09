@@ -9,7 +9,7 @@ const int N=10;
 formula action = go_action|stop_action;
 formula action2=go_action2|stop_action2;
 formula carpol1 = c1_go1|c1_stop1;
-//formula carpol2 = c2_go2|c2_stop2;
+formula carpol2 = c2_go2|c2_stop2;
 const double pL=.6;
 
 module autonomous_car
@@ -74,17 +74,17 @@ endmodule
 
 module pedestrian
 	p : [2..N] init 2;
-	//[move] (p=2) -> pL:(p'=3) + 1-pL:(p'=2);
-	//[move] (p=3) -> pL/2:(p'=2)+pL/2:(p'=8) + 1-pL:(p'=3);
-	//[move] (p=8) -> pL:(p'=3) + 1-pL:(p'=8); 
+	[move] (p=2) -> pL:(p'=3) + 1-pL:(p'=2);
+	[move] (p=3) -> pL/2:(p'=2)+pL/2:(p'=8) + 1-pL:(p'=3);
+	[move] (p=8) -> pL:(p'=3) + 1-pL:(p'=8); 
 
 
-//	[move] (p=2) -> 1:(p'=3) ;
-//	[move] (p=3) -> 1:(p'=8) ;
-//	[move] (p=8) ->  1:(p'=8); 
+	//[move] (p=2) -> 1:(p'=3) ;
+	//[move] (p=3) -> 1:(p'=8) ;
+	//[move] (p=8) ->  1:(p'=8); 
 
 	
-	[move] (p=2) -> 1: (p'=2);
+//	[move] (p=2) -> 1: (p'=2);
 
 endmodule
 
@@ -102,8 +102,7 @@ label "h5" = (h=5);
 label "h7" = (h=7);
 label "h9" = (h=9);
 
-//label "crash" = (crash=true); 
-label "goal" = (a=9);
+label "goal" = (a=9) | (h=9);
 
 label "go1" = go_action;
 label "stop1" = stop_action;

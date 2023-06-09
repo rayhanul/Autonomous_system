@@ -29,11 +29,9 @@ def generate_pqr():
         p= p/factor
         q=q/factor
         r =1-(p+q)
-
         return p, q, r
     
 def generate_pq():
         p = random.uniform(0, 1)
         q = 1 - p
-
         return p, q
