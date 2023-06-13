@@ -7,6 +7,7 @@ const int N=10;
 formula action = go_action|stop_action;
 formula action2=go_action2|stop_action2;
 
+const double pl =.9 ;
 
 module autonomous_car
 	a : [1..N] init 1;
@@ -15,18 +16,18 @@ module autonomous_car
 	[go] !action -> 1:(go_action'=true);
 	[stop] !action -> 1:(stop_action'=true);
 
-	[move] (a=1)&go_action -> 0.9: (a'=3)&(go_action'=false) + 0.1: (a'=1)&(go_action'=false);
-	[move] (a=1)&stop_action -> 0.9: (a'=1)&(stop_action'=false)+  0.1: (a'=3)&(stop_action'=false);
+	[move] (a=1)&go_action -> pl: (a'=3)&(go_action'=false) + (1-pl): (a'=1)&(go_action'=false);
+	[move] (a=1)&stop_action -> pl: (a'=1)&(stop_action'=false)+  (1-pl): (a'=3)&(stop_action'=false);
 
-	[move] (a=3)&go_action -> 0.9: (a'=5)&(go_action'=false) + 0.1: (a'=3)&(go_action'=false);
-	[move] (a=3)&stop_action -> 0.9: (a'=3)&(stop_action'=false)+  0.1: (a'=5)&(stop_action'=false);
+	[move] (a=3)&go_action -> pl: (a'=5)&(go_action'=false) + (1-pl): (a'=3)&(go_action'=false);
+	[move] (a=3)&stop_action -> pl: (a'=3)&(stop_action'=false)+  (1-pl): (a'=5)&(stop_action'=false);
 
 
-	[move] (a=5)&go_action -> 0.9: (a'=7)&(go_action'=false) + 0.1: (a'=5)&(go_action'=false);
-	[move] (a=5)&stop_action -> 0.9: (a'=5)&(stop_action'=false)+  0.1: (a'=7)&(stop_action'=false);
+	[move] (a=5)&go_action -> pl: (a'=7)&(go_action'=false) + (1-pl): (a'=5)&(go_action'=false);
+	[move] (a=5)&stop_action -> pl: (a'=5)&(stop_action'=false)+  (1-pl): (a'=7)&(stop_action'=false);
 
-	[move] (a=7)&go_action -> 0.9: (a'=9)&(go_action'=false) + 0.1: (a'=7)&(go_action'=false);
-	[move] (a=7)&stop_action -> 0.9: (a'=7)&(stop_action'=false)+  0.1: (a'=7)&(stop_action'=false);
+	[move] (a=7)&go_action -> pl: (a'=9)&(go_action'=false) + (1-pl): (a'=7)&(go_action'=false);
+	[move] (a=7)&stop_action -> pl: (a'=7)&(stop_action'=false)+  (1-pl): (a'=7)&(stop_action'=false);
 
 	[] (a=9) -> true;
 
@@ -39,21 +40,21 @@ module human_car
 	[go2] !action2 -> 1:(go_action2'=true);
 	[stop2] !action2 -> 1:(stop_action2'=true);
 
-	[move] (h=0)&go_action2 -> 0.9: (h'=1)&(go_action2'=false) + 0.1: (h'=0)&(go_action2'=false);
-	[move] (h=0)&stop_action2 -> 0.9: (h'=0)&(stop_action2'=false)+  0.1: (h'=1)&(stop_action2'=false);
+	[move] (h=0)&go_action2 -> pl: (h'=1)&(go_action2'=false) + (1-pl): (h'=0)&(go_action2'=false);
+	[move] (h=0)&stop_action2 -> pl: (h'=0)&(stop_action2'=false)+  (1-pl): (h'=1)&(stop_action2'=false);
 
-	[move] (h=1)&go_action2 -> 0.9: (h'=3)&(go_action2'=false) + 0.1: (h'=1)&(go_action2'=false);
-	[move] (h=1)&stop_action -> 0.9: (h'=1)&(stop_action2'=false)+  0.1: (h'=3)&(stop_action2'=false);
+	[move] (h=1)&go_action2 -> pl: (h'=3)&(go_action2'=false) + (1-pl): (h'=1)&(go_action2'=false);
+	[move] (h=1)&stop_action -> pl: (h'=1)&(stop_action2'=false)+  (1-pl): (h'=3)&(stop_action2'=false);
 
-	[move] (h=3)&go_action2 -> 0.9: (h'=5)&(go_action2'=false) + 0.1: (h'=3)&(go_action2'=false);
-	[move] (h=3)&stop_action2 -> 0.9: (h'=3)&(stop_action2'=false)+  0.1: (h'=5)&(stop_action2'=false);
+	[move] (h=3)&go_action2 -> pl: (h'=5)&(go_action2'=false) + (1-pl): (h'=3)&(go_action2'=false);
+	[move] (h=3)&stop_action2 -> pl: (h'=3)&(stop_action2'=false)+  (1-pl): (h'=5)&(stop_action2'=false);
 
 
-	[move] (h=5)&go_action2 -> 0.9: (h'=7)&(go_action2'=false) + 0.1: (h'=5)&(go_action2'=false);
-	[move] (h=5)&stop_action2 -> 0.9: (h'=5)&(stop_action2'=false)+  0.1: (h'=7)&(stop_action2'=false);
+	[move] (h=5)&go_action2 -> pl: (h'=7)&(go_action2'=false) + (1-pl): (h'=5)&(go_action2'=false);
+	[move] (h=5)&stop_action2 -> pl: (h'=5)&(stop_action2'=false)+  (1-pl): (h'=7)&(stop_action2'=false);
 
-	[move] (h=7)&go_action2 -> 0.9: (h'=9)&(go_action2'=false) + 0.1: (h'=7)&(go_action2'=false);
-	[move] (h=7)&stop_action2 -> 0.9: (h'=7)&(stop_action2'=false)+  0.1: (h'=7)&(stop_action2'=false);
+	[move] (h=7)&go_action2 -> pl: (h'=9)&(go_action2'=false) + (1-pl): (h'=7)&(go_action2'=false);
+	[move] (h=7)&stop_action2 -> pl: (h'=7)&(stop_action2'=false)+  (1-pl): (h'=7)&(stop_action2'=false);
 
 	[] (h=9) -> true;
 

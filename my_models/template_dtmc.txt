@@ -10,7 +10,7 @@ formula action = go_action|stop_action;
 formula action2=go_action2|stop_action2;
 formula carpol1 = c1_go1|c1_stop1;
 formula carpol2 = c2_go2|c2_stop2;
-const double pL=.6;
+const double pL=.8;
 
 module autonomous_car
 	a : [1..N] init 1;

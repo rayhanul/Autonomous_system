@@ -9,7 +9,7 @@ formula action = go_action|stop_action;
 formula action2=go_action2|stop_action2;
 formula carpol1 = c1_go1|c1_stop1;
 formula carpol2 = c2_go2|c2_stop2;
-const double pL=.6;
+const double pL=.3;
 
 module autonomous_car
 	a : [1..N] init 1;
@@ -80,12 +80,12 @@ module pedestrian
 	//[move] (p=8) -> pL:(p'=3) + 1-pL:(p'=8); 
 
 
-	[move] (p=2) -> 1:(p'=3) ;
-	[move] (p=3) -> 1:(p'=8) ;
-	[move] (p=8) ->  1:(p'=8); 
+	//[move] (p=2) -> 1:(p'=3) ;
+	//[move] (p=3) -> 1:(p'=8) ;
+	//[move] (p=8) ->  1:(p'=8); 
 
 	
-//	[move] (p=2) -> 1: (p'=2);
+	[move] (p=2) -> 1: (p'=2);
 
 endmodule
 
@@ -122,7 +122,7 @@ label "p8" = (p=8) ; module car1policy
 
 	[go] c1_go1 -> 1:(c1_go1'=false);
 	[stop] c1_stop1 -> 1:(c1_stop1'=false);
-	[assign] !carpol1 &(a=1) & (h=0) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(a=1) & (h=0) & (p=2) -> (c1_go1'=true);
 	[assign] !carpol1 &(a=3) & (h=1) & (p=2) -> (c1_go1'=true);
 	[assign] !carpol1 &(a=3) & (h=1) & (p=4) -> (c1_stop1'=true);
 	[assign] !carpol1 &(a=3) & (h=0) & (p=2) -> (c1_go1'=true);
@@ -228,7 +228,7 @@ module car2policy
 
 	[go2] c2_go2 -> 1:(c2_go2'=false);
 	[stop2] c2_stop2 -> 1:(c2_stop2'=false);
-	[assign] !carpol2 &(a=1) & (h=0) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(a=1) & (h=0) & (p=2) -> (c2_go2'=true);
 	[assign] !carpol2 &(a=3) & (h=1) & (p=2) -> (c2_go2'=true);
 	[assign] !carpol2 &(a=3) & (h=1) & (p=4) -> (c2_stop2'=true);
 	[assign] !carpol2 &(a=3) & (h=0) & (p=2) -> (c2_go2'=true);

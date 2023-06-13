@@ -17,7 +17,10 @@ class Analyzer:
 
     def __init__(self) :
         self.composed_system=[]
-        self.model_path= os.path.join("/home/rayhanul/Documents/GitHub/Autonomous_system", "my_models")
+        ubuntu_path="/home/rayhanul"
+        ios_path=""
+        self.model_path=os.path.join(ubuntu_path, "Documents/GitHub/Autonomous_system")
+        self.model_path= os.path.join(self.model_path, "my_models")
 
     def create_composed_model(self):        
         autonomous_car_path = os.path.join(self.model_path, "autonomous_car.nm")
