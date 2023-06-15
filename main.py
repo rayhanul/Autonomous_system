@@ -6,8 +6,6 @@ from Prism_model_generator import *
 import re 
 import json 
 import numpy as np 
-from tulip.interfaces import stormpy as stormpy_int
-from tulip.transys.compositions import synchronous_parallel
 import stormpy 
 
 import matplotlib.pyplot as plt 
@@ -17,12 +15,12 @@ from Agent import *
 
 if __name__=="__main__":
 
-    numiter=1
+    numiter=200
     counterarray= [0 for _ in range(numiter)]
     data_out = dict()
 
-    dtmc_template_file="template_dtmc.txt"
-    template_model='template_model.txt' 
+    dtmc_template_file="template_dtmc_2.txt"
+    template_model='template_model_2.txt' 
 
     for iter in range(0,numiter):
         
@@ -132,12 +130,15 @@ if __name__=="__main__":
 
         # print(result.scheduler.get_choice(0).get_deterministic_choice())
 
-        Agent1_pol = get_policies(analyzer, model, result, ['go1','stop1'])
+        Agent1_pol = autonomous_agent.get_policies(analyzer, model, result, ['go1','stop1'])
 
-        Agent2_pol = get_policies(analyzer, model_human, result_human, ['go2','stop2'])
+        Agent2_pol = human_agent.get_policies(analyzer2, model_human, result_human, ['go2','stop2'])
         
         # create complete model applying policies ... 
-        create_dtmc_model_using_policies(analyzer, Agent1_pol, Agent1_pol, dtmc_template_file)
+
+        true_env_autonomous=autonomous_agent.get_EnvironmentModel()
+        
+        create_dtmc_model_using_policies(analyzer, Agent1_pol, Agent2_pol, true_env_autonomous, dtmc_template_file)
 
         formula='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7")|("h3" & "p3") | ("h5" & "p5") | ("h7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal"]'
         dtmc_model_path=os.path.join(analyzer.model_path, 'two_car_dtmc.prism')
@@ -154,23 +155,23 @@ if __name__=="__main__":
         data_out.update({(belief_model_prob, belief_model_prob_human): original_model_prob})
 
     index=[i for i in range(0, len(data_out))]
-    fig = plt.figure()
-    ax = plt.axes()
-    xline = []
-    yline = []
-    for data in data_out: 
-        xline.append(data[1])
-        yline.append(data_out[data])
+    # fig = plt.figure()
+    # ax = plt.axes()
+    # xline = []
+    # yline = []
+    # for data in data_out: 
+    #     xline.append(data[1])
+    #     yline.append(data_out[data])
     
 
-    plt.plot(index, xline, label="prob. based on belief model", linestyle="-")
-    plt.plot(index, yline, label="prob. after applying policies", linestyle="--")
-    plt.legend()
-    plt.show()
+    # plt.plot(index, xline, label="prob. based on belief model", linestyle="-")
+    # plt.plot(index, yline, label="prob. after applying policies", linestyle="--")
+    # plt.legend()
+    # plt.show()
 
-    # name='porbability'+str(int(time.time()))+'.png'
+    # # name='porbability'+str(int(time.time()))+'.png'
 
-    # plt.savefig(name)
+    # # plt.savefig(name)
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')
@@ -189,5 +190,7 @@ if __name__=="__main__":
     ax.set_ylabel(r'$p_2$')
     ax.set_zlabel(r'$p_T$')
     plt.show() 
+
+    print('show')
 
 

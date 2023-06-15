@@ -73,11 +73,11 @@ module human_car
 endmodule
 
 
-module pedestrian
-	p : [2..N] init 2;
-	//[move] (p=2) -> pL:(p'=3) + 1-pL:(p'=2);
-	//[move] (p=3) -> pL/2:(p'=2)+pL/2:(p'=8) + 1-pL:(p'=3);
-	//[move] (p=8) -> pL:(p'=3) + 1-pL:(p'=8); 
+//module pedestrian
+//	p : [2..N] init 2;
+//	[move] (p=2) -> pL:(p'=3) + 1-pL:(p'=2);
+//	[move] (p=3) -> pL/2:(p'=2)+pL/2:(p'=8) + 1-pL:(p'=3);
+//	[move] (p=8) -> pL:(p'=3) + 1-pL:(p'=8); 
 
 
 	//[move] (p=2) -> 1:(p'=3) ;
@@ -85,9 +85,12 @@ module pedestrian
 	//[move] (p=8) ->  1:(p'=8); 
 
 	
-	[move] (p=2) -> 1: (p'=2);
+	//[move] (p=2) -> 1: (p'=2);
 
-endmodule
+//endmodule
+
+%env_model%
+
 
 
 label "a1" = (a=1);

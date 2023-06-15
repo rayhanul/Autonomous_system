@@ -6,8 +6,8 @@ from Prism_model_generator import *
 import re 
 import json 
 import numpy as np 
-from tulip.interfaces import stormpy as stormpy_int
-from tulip.transys.compositions import synchronous_parallel
+# from tulip.interfaces import stormpy as stormpy_int
+# from tulip.transys.compositions import synchronous_parallel
 import stormpy 
 
 import matplotlib.pyplot as plt 
@@ -22,25 +22,25 @@ class Analyzer:
         self.model_path=os.path.join(ubuntu_path, "Documents/GitHub/Autonomous_system")
         self.model_path= os.path.join(self.model_path, "my_models")
 
-    def create_composed_model(self):        
-        autonomous_car_path = os.path.join(self.model_path, "autonomous_car.nm")
-        human_car_path = os.path.join(self.model_path, "human_car.nm")
-        env_path= os.path.join(self.model_path, "env_model.nm")
-        # combined= os.path.join(self.model_path, "combined.nm")
-        autonomous_car_model = stormpy_int.to_tulip_transys(autonomous_car_path)
-        human_car_model = stormpy_int.to_tulip_transys(human_car_path)
-        env_model= stormpy_int.to_tulip_transys(env_path)
-        # combined_model= stormpy_int.to_tulip_transys(combined)
-        composed = synchronous_parallel([autonomous_car_model, human_car_model, env_model])
+    # def create_composed_model(self):        
+    #     autonomous_car_path = os.path.join(self.model_path, "autonomous_car.nm")
+    #     human_car_path = os.path.join(self.model_path, "human_car.nm")
+    #     env_path= os.path.join(self.model_path, "env_model.nm")
+    #     # combined= os.path.join(self.model_path, "combined.nm")
+    #     autonomous_car_model = stormpy_int.to_tulip_transys(autonomous_car_path)
+    #     human_car_model = stormpy_int.to_tulip_transys(human_car_path)
+    #     env_model= stormpy_int.to_tulip_transys(env_path)
+    #     # combined_model= stormpy_int.to_tulip_transys(combined)
+    #     composed = synchronous_parallel([autonomous_car_model, human_car_model, env_model])
 
 
-        self.composed_system=composed 
+    #     self.composed_system=composed 
         
-    def get_composed_model(self, final_model_file="final_combined_model.nm"):
-        composed_model_path = os.path.join(self.model_path, final_model_file)
-        composed_model = stormpy_int.to_tulip_transys(composed_model_path)
-        composed = synchronous_parallel([composed_model])
-        return composed 
+    # def get_composed_model(self, final_model_file="final_combined_model.nm"):
+    #     composed_model_path = os.path.join(self.model_path, final_model_file)
+    #     composed_model = stormpy_int.to_tulip_transys(composed_model_path)
+    #     composed = synchronous_parallel([composed_model])
+    #     return composed 
     
     def writeToFile(self, program, model_name):
         path= os.path.join(self.model_path, model_name)
@@ -58,15 +58,15 @@ class Analyzer:
             new_model.write(addinational_text)
             new_model.write('\n')
 
-    def get_probability_satisfying_property(self, property):
-        out_path= os.path.join(self.model_path, 'out_final_combined_model.nm')
-        composed_model=self.get_composed_model()
-        # print(composed_model)
-        result, policy = stormpy_int.model_checking(composed_model, property, out_path, True)
+    # def get_probability_satisfying_property(self, property):
+    #     out_path= os.path.join(self.model_path, 'out_final_combined_model.nm')
+    #     composed_model=self.get_composed_model()
+    #     # print(composed_model)
+    #     result, policy = stormpy_int.model_checking(composed_model, property, out_path, True)
 
-        for state in composed_model.states:
-            label=composed_model.states[state]["ap"]
-            # print(f"  State {state}, with labels {label}, Pr = {result[state]}")
+    #     for state in composed_model.states:
+    #         label=composed_model.states[state]["ap"]
+    #         # print(f"  State {state}, with labels {label}, Pr = {result[state]}")
 
     def is_crush_exist(self, labels):
         # condition to be crush = 3, 5, 7
@@ -84,87 +84,57 @@ class Analyzer:
             return True 
         return False 
     
-def get_policies(analyzer, model, result, actions):
-    Agent1_pol = dict()
-    Agent2_pol = dict()
+# def get_policies(analyzer, model, result, actions):
+#     Agent1_pol = dict()
+#     Agent2_pol = dict()
 
-    move_ids = [m_s.id for m_s in model.states for s_i in m_s.labels if 'go' in s_i or 'stop' in s_i]
+#     move_ids = [m_s.id for m_s in model.states for s_i in m_s.labels if 'go' in s_i or 'stop' in s_i]
 
-    action_points = set(range(model.nr_states)) - set(move_ids)
-    actions1 = actions
-    actions2 = ['go2','stop2']
+#     action_points = set(range(model.nr_states)) - set(move_ids)
+#     actions1 = actions
+#     actions2 = ['go2','stop2']
 
-    for s_i in action_points:
-        # print(model.states[s_i].labels)
+#     for s_i in action_points:
+#         # print(model.states[s_i].labels)
 
-        for l_i in model.states[s_i].labels:
-            if 'a' in l_i:
-                s_state = l_i
-            elif 'h' in l_i:
-                x_state = l_i
-            elif 'p' in l_i:
-                p_state = l_i
+#         for l_i in model.states[s_i].labels:
+#             if 'a' in l_i:
+#                 s_state = l_i
+#             elif 'h' in l_i:
+#                 x_state = l_i
+#             elif 'p' in l_i:
+#                 p_state = l_i
 
-        deterministic_choice=result.scheduler.get_choice(s_i).get_deterministic_choice()
-        transition_at_s_i = model.states[s_i].actions[deterministic_choice].transitions
-        hold_state = model.states[int(re.findall('\\d+',str(transition_at_s_i))[0])]
-        # print(model.states[s_i].labels)
-        next_action = result.scheduler.get_choice(hold_state).get_deterministic_choice()
-        next_state = model.states[int(re.findall('\\d+', str(hold_state.actions[int(next_action)].transitions))[0])]
-        # print(next_state)
-        # if 'crash' not in next_state.labels and 'goal' not in next_state.labels:
-        text= not analyzer.is_crush_exist(next_state.labels)
-        # print(text)
-        if not analyzer.is_crush_exist(next_state.labels) and 'goal' not in next_state.labels:
-            act_tup = tuple()
-            act_tuple1=[l_ind for l_ind,l_a in enumerate(actions1) if l_a in next_state.labels]
-            # act_tuple2=[l_ind for l_ind,l_a in enumerate(actions2) if l_a in next_state.labels]
-            if len(act_tuple1)>0 :
-                act_tup += (act_tuple1[0],)
-                # act_tup += (act_tuple2[0],)
-                Agent1_pol.update({(s_state, x_state, p_state): act_tup[0] })
-    return Agent1_pol
+#         deterministic_choice=result.scheduler.get_choice(s_i).get_deterministic_choice()
+#         transition_at_s_i = model.states[s_i].actions[deterministic_choice].transitions
+#         hold_state = model.states[int(re.findall('\\d+',str(transition_at_s_i))[0])]
+#         # print(model.states[s_i].labels)
+#         next_action = result.scheduler.get_choice(hold_state).get_deterministic_choice()
+#         next_state = model.states[int(re.findall('\\d+', str(hold_state.actions[int(next_action)].transitions))[0])]
+#         # print(next_state)
+#         # if 'crash' not in next_state.labels and 'goal' not in next_state.labels:
+#         text= not analyzer.is_crush_exist(next_state.labels)
+#         # print(text)
+#         if not analyzer.is_crush_exist(next_state.labels) and 'goal' not in next_state.labels:
+#             act_tup = tuple()
+#             act_tuple1=[l_ind for l_ind,l_a in enumerate(actions1) if l_a in next_state.labels]
+#             # act_tuple2=[l_ind for l_ind,l_a in enumerate(actions2) if l_a in next_state.labels]
+#             if len(act_tuple1)>0 :
+#                 act_tup += (act_tuple1[0],)
+#                 # act_tup += (act_tuple2[0],)
+#                 Agent1_pol.update({(s_state, x_state, p_state): act_tup[0] })
+#     return Agent1_pol
 
-def get_policies_for_human(analyzer, model, result):
-
-    Agent2_pol = dict()
-
-    move_ids = [m_s.id for m_s in model.states for s_i in m_s.labels if 'go' in s_i or 'stop' in s_i]
-
-    action_points = set(range(model.nr_states)) - set(move_ids)
-    actions1 = ['go1','stop1']
-    actions2 = ['go2','stop2']
-
-    for s_i in action_points:
-    # print(model.states[s_i].labels)
-        for l_i in model.states[s_i].labels:
-            if 'a' in l_i and not 'crash' in l_i:
-                s_state = l_i
-            elif 'h' in l_i:
-                x_state = l_i
-            elif 'p' in l_i:
-                p_state = l_i
-
-
-        hold_state2 = model.states[int(re.findall('\\d+', str(model.states[s_i].actions[result.scheduler.get_choice(s_i).get_deterministic_choice()].transitions))[0])]
-        next_action2 = result.scheduler.get_choice(hold_state2).get_deterministic_choice()
-        next_state2 = model.states[int(re.findall('\\d+', str(hold_state2.actions[int(next_action2)].transitions))[0])]
-        if not analyzer.is_crush_exist(next_state2.labels) and 'goal' not in next_state2.labels:
-            act_tup2 = tuple()
-            act_tup2 += ([l_ind for l_ind,l_a in enumerate(actions1) if l_a in next_state2.labels][0],)
-            act_tup2 += ([l_ind for l_ind,l_a in enumerate(actions2) if l_a in next_state2.labels][0],)
-            Agent2_pol.update({(s_state,x_state,p_state):act_tup2[0]})
-    return Agent2_pol
-
-
-def create_dtmc_model_using_policies(analyzer, Agent1_pol, Agent2_pol, template_file):
+def create_dtmc_model_using_policies(analyzer, Agent1_pol, Agent2_pol, true_env_model, template_file):
     tc_dtmc = "two_car_dtmc.prism"
     tc_dtmc = os.path.join(analyzer.model_path, tc_dtmc)
     template= os.path.join(analyzer.model_path, template_file)
+
     with open(template) as f:
         with open(tc_dtmc, "w+") as f1:
             for line in f:
                 f1.write(line)
+
 
     with open(tc_dtmc, 'a+') as dtmc_file:
         dtmc_file.write("module car1policy\n\tc1_go1 : bool init false;\n\tc1_stop1 : bool init false;\n\n\t[go] c1_go1 -> 1:(c1_go1'=false);\n\t[stop] c1_stop1 -> 1:(c1_stop1'=false);\n")
@@ -196,6 +166,17 @@ def create_dtmc_model_using_policies(analyzer, Agent1_pol, Agent2_pol, template_
             dtmc_file.write(pol2_lead + state_in + out2_ind[pol_ind])
 
         dtmc_file.write('endmodule\n')
+
+
+    search_text='%env_model%'
+
+    with open(tc_dtmc, 'r') as file:
+        data=file.read()
+        data=data.replace(search_text, true_env_model)
+
+    with open(tc_dtmc, 'w') as file2:
+        file2.write(data)
+
 
 
 
