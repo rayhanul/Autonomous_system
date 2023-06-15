@@ -6,8 +6,6 @@ from Prism_model_generator import *
 import re 
 import json 
 import numpy as np 
-# from tulip.interfaces import stormpy as stormpy_int
-# from tulip.transys.compositions import synchronous_parallel
 import stormpy 
 
 import matplotlib.pyplot as plt 
@@ -22,25 +20,6 @@ class Analyzer:
         self.model_path=os.path.join(ubuntu_path, "Documents/GitHub/Autonomous_system")
         self.model_path= os.path.join(self.model_path, "my_models")
 
-    # def create_composed_model(self):        
-    #     autonomous_car_path = os.path.join(self.model_path, "autonomous_car.nm")
-    #     human_car_path = os.path.join(self.model_path, "human_car.nm")
-    #     env_path= os.path.join(self.model_path, "env_model.nm")
-    #     # combined= os.path.join(self.model_path, "combined.nm")
-    #     autonomous_car_model = stormpy_int.to_tulip_transys(autonomous_car_path)
-    #     human_car_model = stormpy_int.to_tulip_transys(human_car_path)
-    #     env_model= stormpy_int.to_tulip_transys(env_path)
-    #     # combined_model= stormpy_int.to_tulip_transys(combined)
-    #     composed = synchronous_parallel([autonomous_car_model, human_car_model, env_model])
-
-
-    #     self.composed_system=composed 
-        
-    # def get_composed_model(self, final_model_file="final_combined_model.nm"):
-    #     composed_model_path = os.path.join(self.model_path, final_model_file)
-    #     composed_model = stormpy_int.to_tulip_transys(composed_model_path)
-    #     composed = synchronous_parallel([composed_model])
-    #     return composed 
     
     def writeToFile(self, program, model_name):
         path= os.path.join(self.model_path, model_name)
@@ -57,16 +36,6 @@ class Analyzer:
             new_model.write('\n') 
             new_model.write(addinational_text)
             new_model.write('\n')
-
-    # def get_probability_satisfying_property(self, property):
-    #     out_path= os.path.join(self.model_path, 'out_final_combined_model.nm')
-    #     composed_model=self.get_composed_model()
-    #     # print(composed_model)
-    #     result, policy = stormpy_int.model_checking(composed_model, property, out_path, True)
-
-    #     for state in composed_model.states:
-    #         label=composed_model.states[state]["ap"]
-    #         # print(f"  State {state}, with labels {label}, Pr = {result[state]}")
 
     def is_crush_exist(self, labels):
         # condition to be crush = 3, 5, 7

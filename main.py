@@ -15,7 +15,7 @@ from Agent import *
 
 if __name__=="__main__":
 
-    numiter=200
+    numiter=50
     counterarray= [0 for _ in range(numiter)]
     data_out = dict()
 
@@ -50,17 +50,20 @@ if __name__=="__main__":
         analyzer=Analyzer()
 
         mcs={0:{'mc':mc_1, 'prob': 0.5}, 1:{'mc':mc_2, 'prob': 0.5}}
-        autonomous_agent=Agent(mcs=mcs,  template_model=template_model, limit=9, env_model_name="env_model.nm", discretized_road=["p3","p5", "p7", "p8"], combined_model_name='final_combined_model.nm')
-        autonomous_agent.get_agent_model()
-
+        
         # print("composed done") 
         # property_tobe_verfied='Pmax=?[!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7")) U "goal"]'
         property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal"]'
         # property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7"))) U "goal"]'
+        
+        autonomous_agent=Agent(mcs=mcs,  template_model=template_model, limit=9, formula=property_tobe_verfied, env_model_name="env_model.nm", discretized_road=["p3","p5", "p7", "p8"], combined_model_name='final_combined_model.nm')
+        autonomous_agent.get_agent_model()
+
+
         path=os.path.join(analyzer.model_path, 'final_combined_model.nm')
 
         prism_program=stormpy.parse_prism_program(path)
-        properties=stormpy.parse_properties(property_tobe_verfied, prism_program)
+        properties=stormpy.parse_properties(autonomous_agent.formula, prism_program)
         model=stormpy.build_sparse_model(prism_program)
 
         result=stormpy.model_checking(model, properties[0],  extract_scheduler=True) 
@@ -96,16 +99,17 @@ if __name__=="__main__":
     
 
         analyzer2=Analyzer()
+        formula_human='Pmax=?[(!(("h3" & "p3") | ("h5" & "p5") | ("h7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal2"]'
 
         mcs_human={0:{'mc':mc_1_human, 'prob': 0.5}, 1:{'mc':mc_2_human, 'prob': 0.5}}
-        human_agent=Agent(mcs=mcs_human,  template_model=template_model, limit=9, env_model_name="env_model_human.nm", discretized_road=["p3","p5", "p7", "p8"], combined_model_name='final_combined_model_human.nm')
+        human_agent=Agent(mcs=mcs_human,  template_model=template_model, limit=9, formula=formula_human, env_model_name="env_model_human.nm", discretized_road=["p3","p5", "p7", "p8"], combined_model_name='final_combined_model_human.nm')
         autonomous_agent.get_agent_model()
 
-        formula_human='Pmax=?[(!(("h3" & "p3") | ("h5" & "p5") | ("h7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal2"]'
+        
         path_human=os.path.join(analyzer2.model_path, 'final_combined_model.nm')
 
         prism_program_human=stormpy.parse_prism_program(path_human)
-        properties_human=stormpy.parse_properties(formula_human, prism_program_human)
+        properties_human=stormpy.parse_properties(human_agent.formula, prism_program_human)
         model_human=stormpy.build_sparse_model(prism_program_human)
 
         result_human=stormpy.model_checking(model_human, properties_human[0],  extract_scheduler=True) 
@@ -141,6 +145,7 @@ if __name__=="__main__":
         create_dtmc_model_using_policies(analyzer, Agent1_pol, Agent2_pol, true_env_autonomous, dtmc_template_file)
 
         formula='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7")|("h3" & "p3") | ("h5" & "p5") | ("h7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal"]'
+        
         dtmc_model_path=os.path.join(analyzer.model_path, 'two_car_dtmc.prism')
         prism_program=stormpy.parse_prism_program(dtmc_model_path)
         properties=stormpy.parse_properties(property_tobe_verfied, prism_program)
@@ -186,8 +191,8 @@ if __name__=="__main__":
     a_li = np.asarray([xline, yline, zline])
     # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
     ax.scatter3D(xline, yline, zline, c=zline)
-    ax.set_xlabel(r'$p_1$')
-    ax.set_ylabel(r'$p_2$')
+    ax.set_xlabel(r'$p_A$')
+    ax.set_ylabel(r'$p_H$')
     ax.set_zlabel(r'$p_T$')
     plt.show() 
 

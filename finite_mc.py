@@ -3,6 +3,8 @@ import  itertools
 from mc import MC
 from helper import * 
 from collections import deque 
+import numpy as np 
+import math 
 
 class BeliefTransition:
     def __init__(self, mcs, selected_mc, limit, discretized_road, mcs_states=None, init_belief='b6'):
@@ -214,6 +216,190 @@ class BeliefTransition:
         return states, MC(init=init_state, transitions=new_transitions, labels=new_labels, states=new_states)
 
 
+class Belief:
+    def __init__(self, mcs, init_belief='b0'):
+
+        self.mcs=mcs 
+
+        self.all_beliefs={}
+        b_distribution={}
+        prob=1/len(self.mcs)
+        for idx, mc in self.mcs.items():
+            b_distribution.update({idx:prob})
+        
+        self.all_beliefs.update({init_belief:b_distribution})
+        self.initial_belief_state=(mcs[0]['mc'].init, init_belief)
+
+    def tau(self, current_state, next_state, current_belief):
+
+        current_belief_distribution=self.all_beliefs[current_belief]
+
+        next_belief_distribution={}
+
+        for idx, mc in self.mcs.items():
+
+            if mc['mc'].has_transition(current_state, next_state):
+                try:
+                    belief_prob=current_belief_distribution[idx] 
+                except:
+                    belief_prob=0
+
+                prob=belief_prob * mc['mc'].get_transition_probability(current_state, next_state)
+                next_belief_distribution.update({idx:prob})
+
+        # normalize the next_belief_distribution 
+        total=sum(next_belief_distribution.values())
+        normalized_next_belief_distribution={}
+        for idx, val in next_belief_distribution.items():
+            norm_val=val/total
+            normalized_next_belief_distribution.update({idx:norm_val})
+        
+        number_beliefs=len(self.all_beliefs)
+        next_b='b'+str(number_beliefs)
+
+        # update belief if not in withing given threshold... 
+        flag, belief_name, next_belief = self.get_Belief_within_threshold(next_b, normalized_next_belief_distribution, threshold=0.1)
+        if not flag:
+            self.all_beliefs.update({next_b:normalized_next_belief_distribution})
+        else: 
+            next_b=belief_name
+
+        return next_b 
+
+        
+    def get_Belief_within_threshold(self, belief, belief_distribution, threshold):
+
+        belief_name=None 
+        for idx, val in self.all_beliefs.items():
+            values=list(val.values())
+            values2=list(belief_distribution.values())
+            difference= [abs(val-val2) for val, val2 in zip(values, values2) if abs(val-val2) <=threshold]
+            belief_name=idx 
+            if len(difference) > 0:
+                return True, idx, self.all_beliefs[idx]
+        return False, [], [] 
+        
+
+    def get_complete_environment_model(self):
+
+        visited=[]
+        transitions={}
+
+        Q=deque()
+        Q.append(self.initial_belief_state)
+
+        while len(Q) > 0:
+
+            elem=Q.popleft()
+            visited.append(elem)
+            all_next_states=self.get_all_next_states(elem[0])
+            transition={}
+            for state in all_next_states:
+                next_belief = self.tau(elem[0], state, elem[1])
+                
+                next_belief_state=(state, next_belief)
+                if not next_belief_state in visited :
+                    Q.append(next_belief_state)
+
+                prob=self.get_belief_state_transition_probability(elem, next_belief_state, elem[1])
+                transition.update({next_belief_state:prob})
+            if len(transition) > 0 :
+                transitions.update({elem:transition})
+
+        # return self.get_normalized_transition(transitions)
+        return transitions 
+    
+
+
+    def get_all_next_states(self, state):
+
+        all_next_states=set()
+        for index, mc in self.mcs.items():
+            try:
+                trans=mc['mc'].transitions[state] 
+            except:
+                trans={}
+                
+            all_keys=set(trans.keys())
+            all_next_states=all_next_states.union(all_keys)
+        ordered_items=list(all_next_states)
+        ordered_items.sort()
+        return ordered_items
+
+
+        
+    def get_belief_state_transition_probability(self, current_state, next_state, current_belief):
+        
+        prob=0
+        belief_probs=self.all_beliefs[current_belief]
+        for idx, mc in self.mcs.items():
+            if mc['mc'].has_transition(current_state[0], next_state[0]):
+                try:
+                    belief_prob=belief_probs[idx]
+                except: 
+                    belief_prob=0
+                state_transition_prob=mc['mc'].get_transition_probability(current_state[0], next_state[0])
+                prob += belief_prob * state_transition_prob
+
+        return round(prob,2)
+    
+    def assign_labels(self, states):
+        labels={}
+        
+        for item in states:
+            label=item[0][1]
+            labels.update({item:label})
+        return labels
+
+    def get_all_states(self, transition):
+        states=[ key for key, val in transition.items()]
+        states2=[key  for key, val in transition.items() for key, inner_val in val.items()]
+        states= set(states)
+        states2=set(states2)
+        states=states.union(states2)
+        ordered_states=list(states)
+        ordered_states.sort()
+        return ordered_states
+    
+    def get_new_state_mapping(self, states):
+        new_states={}
+        index=0
+        for  state in states:
+            new_states.update({state:'x'+str(index)})
+            index+=1
+
+        return new_states
+    
+    def get_complete_MC(self, transition, init):
+
+        states=self.get_all_states(transition)
+        labels=self.assign_labels(states)
+
+        new_state_mapping_dict=self.get_new_state_mapping(states)
+        new_states= [ val for key, val in new_state_mapping_dict.items()]
+        # updating labels...
+        new_labels={}
+        for state in labels:
+            new_state=new_state_mapping_dict[state]
+            label=labels[state]
+            new_labels.update({new_state:label})
+
+        init_state=new_state_mapping_dict[init]
+
+        # updating transition states...
+        new_transitions={}
+        for key, val in transition.items():
+
+            new_key=new_state_mapping_dict[key]
+
+            inner_trans={}
+
+            for val_key, val_val in val.items():
+                new_val_key=new_state_mapping_dict[val_key]
+                inner_trans.update({new_val_key:val_val})
+            new_transitions.update({new_key:inner_trans})
+
+        return states, MC(init=init_state, transitions=new_transitions, labels=new_labels, states=new_states)
 
 # if __name__=="__main__":
 
