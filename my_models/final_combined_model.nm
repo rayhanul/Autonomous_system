@@ -7,7 +7,6 @@ const int N=10;
 formula action = go_action|stop_action;
 formula action2=go_action2|stop_action2;
 
-const double pl =.9 ;
 
 module autonomous_car
 	a : [1..N] init 1;
@@ -16,20 +15,21 @@ module autonomous_car
 	[go] !action -> 1:(go_action'=true);
 	[stop] !action -> 1:(stop_action'=true);
 
-	[move] (a=1)&go_action -> pl: (a'=3)&(go_action'=false) + (1-pl): (a'=1)&(go_action'=false);
-	[move] (a=1)&stop_action -> pl: (a'=1)&(stop_action'=false)+  (1-pl): (a'=3)&(stop_action'=false);
+	[move] (a=1) & go_action -> (a'=3)&(go_action'=false);
+	[move] (a=1) & stop_action -> (a'=1)&(stop_action'=false);
 
-	[move] (a=3)&go_action -> pl: (a'=5)&(go_action'=false) + (1-pl): (a'=3)&(go_action'=false);
-	[move] (a=3)&stop_action -> pl: (a'=3)&(stop_action'=false)+  (1-pl): (a'=5)&(stop_action'=false);
+	[move] (a=3) & go_action -> (a'=5)&(go_action'=false);
+	[move] (a=3) & stop_action -> (a'=3)&(stop_action'=false);
 
+	[move] (a=5) & go_action -> (a'=7)&(go_action'=false);
+	[move] (a=5)&stop_action -> (a'=5)&(stop_action'=false);
 
-	[move] (a=5)&go_action -> pl: (a'=7)&(go_action'=false) + (1-pl): (a'=5)&(go_action'=false);
-	[move] (a=5)&stop_action -> pl: (a'=5)&(stop_action'=false)+  (1-pl): (a'=7)&(stop_action'=false);
-
-	[move] (a=7)&go_action -> pl: (a'=9)&(go_action'=false) + (1-pl): (a'=7)&(go_action'=false);
-	[move] (a=7)&stop_action -> pl: (a'=7)&(stop_action'=false)+  (1-pl): (a'=7)&(stop_action'=false);
+	[move] (a=7)&go_action -> (a'=9)&(go_action'=false);
+	[move] (a=7)&stop_action -> (a'=7)&(stop_action'=false);
 
 	[] (a=9) -> true;
+
+
 
 endmodule
 
@@ -40,25 +40,22 @@ module human_car
 	[go2] !action2 -> 1:(go_action2'=true);
 	[stop2] !action2 -> 1:(stop_action2'=true);
 
-	[move] (h=0)&go_action2 -> pl: (h'=1)&(go_action2'=false) + (1-pl): (h'=0)&(go_action2'=false);
-	[move] (h=0)&stop_action2 -> pl: (h'=0)&(stop_action2'=false)+  (1-pl): (h'=1)&(stop_action2'=false);
+	[move] (h=0)&go_action2 -> (h'=1)&(go_action2'=false);
+	[move] (h=0)&stop_action2 -> (h'=0)&(stop_action2'=false);
 
-	[move] (h=1)&go_action2 -> pl: (h'=3)&(go_action2'=false) + (1-pl): (h'=1)&(go_action2'=false);
-	[move] (h=1)&stop_action -> pl: (h'=1)&(stop_action2'=false)+  (1-pl): (h'=3)&(stop_action2'=false);
+	[move] (h=1)&go_action2 -> (h'=3)&(go_action2'=false);
+	[move] (h=1)&stop_action2 -> (h'=1)&(stop_action2'=false);
 
-	[move] (h=3)&go_action2 -> pl: (h'=5)&(go_action2'=false) + (1-pl): (h'=3)&(go_action2'=false);
-	[move] (h=3)&stop_action2 -> pl: (h'=3)&(stop_action2'=false)+  (1-pl): (h'=5)&(stop_action2'=false);
+	[move] (h=3)&go_action2 -> (h'=5)&(go_action2'=false);
+	[move] (h=3)&stop_action2 -> (h'=3)&(stop_action2'=false);
 
+	[move] (h=5)&go_action2 -> (h'=7)&(go_action2'=false);
+	[move] (h=5)&stop_action2 -> (h'=5)&(stop_action2'=false);
 
-	[move] (h=5)&go_action2 -> pl: (h'=7)&(go_action2'=false) + (1-pl): (h'=5)&(go_action2'=false);
-	[move] (h=5)&stop_action2 -> pl: (h'=5)&(stop_action2'=false)+  (1-pl): (h'=7)&(stop_action2'=false);
-
-	[move] (h=7)&go_action2 -> pl: (h'=9)&(go_action2'=false) + (1-pl): (h'=7)&(go_action2'=false);
-	[move] (h=7)&stop_action2 -> pl: (h'=7)&(stop_action2'=false)+  (1-pl): (h'=7)&(stop_action2'=false);
+	[move] (h=7)&go_action2 -> (h'=9)&(go_action2'=false);
+	[move] (h=7)&stop_action2 -> (h'=7)&(stop_action2'=false);
 
 	[] (h=9) -> true;
-
-
 
 endmodule
 
@@ -75,6 +72,8 @@ label "h3" = (h=3);
 label "h5" = (h=5);
 label "h7" = (h=7);
 label "h9" = (h=9);
+
+//label "goal" = (a=9) | (h=9);
 
 label "goal" = (a=9);
 label "goal2" = (h=9);
@@ -94,11 +93,11 @@ label "stop2" = stop_action2;
 const int k =10; 
  module environment 
  p : [0..k] init 0;
- [move] (p=0) ->  0.56 : (p'=1) +0.04 : (p'=3) +0.4 : (p'=4) ; 
-[move] (p=1) ->  0.69 : (p'=2) +0.03 : (p'=3) +0.28 : (p'=5) ; 
+ [move] (p=0) ->  0.39 : (p'=1) +0.14 : (p'=3) +0.47 : (p'=4) ; 
+[move] (p=1) ->  0.31 : (p'=2) +0.08 : (p'=3) +0.61 : (p'=5) ; 
 [move] (p=3) ->  1.0 : (p'=9) ; 
 [move] (p=4) ->  0.26 : (p'=2) +0.3 : (p'=5) +0.18 : (p'=6) +0.26 : (p'=7) ; 
-[move] (p=2) ->  0.76 : (p'=2) +0.02 : (p'=3) +0.22 : (p'=5) ; 
+[move] (p=2) ->  0.27 : (p'=2) +0.05 : (p'=3) +0.68 : (p'=5) ; 
 [move] (p=5) ->  0.29 : (p'=2) +0.3 : (p'=5) +0.12 : (p'=6) +0.29 : (p'=7) ; 
 [move] (p=9) ->  1.0 : (p'=9) ; 
 [move] (p=6) ->  1.0 : (p'=9) ; 

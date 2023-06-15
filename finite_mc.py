@@ -14,7 +14,7 @@ class BeliefTransition:
         self.mc_states=mcs_states
         self.belief_sets=["b"+str(i) for i in range(0,limit)]
         self.init_belief=init_belief
-        self.initial_belief_state=(mcs[0].init, init_belief)
+        self.initial_belief_state=(mcs[0]['mc'].init, init_belief)
         self.init_belief_probability={1:0.5, 2:0.5}
         self.road=discretized_road
 
@@ -43,7 +43,7 @@ class BeliefTransition:
             current_belief=int(current_belief[1])
         if current_belief == 6: # initial belief 
             return 0.5 
-        if mc_index==2:
+        if mc_index==1:
             return 1-0.1 * int(current_belief)
         else :
             return 0.1 * int(current_belief)
@@ -66,13 +66,11 @@ class BeliefTransition:
     def get_belief_state_transition_probability(self, current_state, next_state, current_belief):
         
         prob=0
-        index =1
-        for idx, mc in enumerate(self.mcs):
-            if mc.has_transition(current_state[0], next_state[0]):
-                belief_prob=self.get_belief_transition_probability(idx+1, current_belief)
-                state_transition_prob=mc.get_transition_probability(current_state[0], next_state[0])
+        for idx, mc in self.mcs.items():
+            if mc['mc'].has_transition(current_state[0], next_state[0]):
+                belief_prob=self.get_belief_transition_probability(idx, current_belief)
+                state_transition_prob=mc['mc'].get_transition_probability(current_state[0], next_state[0])
                 prob += belief_prob * state_transition_prob
-            index +=1
 
         return round(prob,2)
 
@@ -130,14 +128,15 @@ class BeliefTransition:
             if len(transition) > 0 :
                 transitions.update({elem:transition})
 
+        # return self.get_normalized_transition(transitions)
         return transitions 
 
     def get_all_next_states(self, state):
 
         all_next_states=set()
-        for mc in self.mcs:
+        for index, mc in self.mcs.items():
             try:
-                trans=mc.transitions[state] 
+                trans=mc['mc'].transitions[state] 
             except:
                 trans={}
                 
@@ -152,10 +151,10 @@ class BeliefTransition:
         
         updated_transition={}
         for key, val in transition.items():
-            if len(val)!=0:
+            if sum(val.values()) != 0:
                 factor = 1.0/sum(val.values())
                 for inner_key, inner_val in val.items():
-                    val[inner_key]= factor * val[inner_key]
+                    val[inner_key]= round(factor * val[inner_key],2)
                 updated_transition.update({key:val})
         return updated_transition 
     
