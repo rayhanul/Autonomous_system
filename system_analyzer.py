@@ -53,6 +53,45 @@ class Analyzer:
             return True 
         return False 
     
+    def get_set_of_mcs(self, number_mcs):
+
+        mcs={}
+        for index in range(number_mcs):
+            # p, q, r = generate_pqr()
+        
+            # mc_2_transition={
+            #     "p2":{"p3":p, "p2":q, "p4":r},
+            #     "p3": {"p8":1}, 
+            #     "p8": {"p8":1}, 
+            #     "p4": {"p4":.3, "p2":0.05, "p5":.6, "p6":.05}, 
+            #     "p5":{"p8": 1},
+            #     "p6":{"p6":.3, "p7":.6, "p4":.1},
+            #     "p7":{"p8":1}
+            # }
+            # p_m2, q_m2 = generate_pq()
+            # mc_1_transition={
+            #     "p2":{"p4":p_m2, "p2":q_m2},
+            #     "p4":{"p4": .3, "p6": .35, "p2":.35},
+            #     "p6":{"p6":.7, "p4":.3}
+            # }
+
+            p = generate_p()
+
+            mc_transition={
+                "p2":{"p3":p, "p2":1-p},
+                "p3":{"p2": p/2, "p3": 1-p, "p8":p/2},
+                "p8":{"p8":1-p, "p3":p}
+            }
+
+            # mc_1=MC(init="p2", transitions=mc_1_transition, states=["p2", "p4", "p6"], labels={"p2":2, "p4":4, "p6":6})
+            # mc_2=MC(init="p2", transitions=mc_transition, states=["p2", "p3", "p4", "p5", "p6", "p7", "p8"], labels={"p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7, "p8":8})
+            mc_2=MC(init="p2", transitions=mc_transition, states=["p2", "p3", "p8"], labels={"p2":2, "p3":3, "p8":8})
+            mcs.update({index:{'mc':mc_2, 'prob':1/number_mcs}})
+
+            # mcs={0:{'mc':mc_1, 'prob': 0.5}, 1:{'mc':mc_2, 'prob': 0.5}}
+
+        return mcs 
+
 # def get_policies(analyzer, model, result, actions):
 #     Agent1_pol = dict()
 #     Agent2_pol = dict()

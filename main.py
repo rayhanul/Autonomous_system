@@ -15,7 +15,7 @@ from Agent import *
 
 if __name__=="__main__":
 
-    numiter=50
+    numiter=300
     counterarray= [0 for _ in range(numiter)]
     data_out = dict()
 
@@ -26,36 +26,15 @@ if __name__=="__main__":
         
 
         # model for Autonomous agent...  
-        p, q, r = generate_pqr()
-        
-        mc_2_transition={
-            "p2":{"p3":p, "p2":q, "p4":r},
-            "p3": {"p8":1}, 
-            "p8": {"p8":1}, 
-            "p4": {"p4":.3, "p2":0.05, "p5":.6, "p6":.05}, 
-            "p5":{"p8": 1},
-            "p6":{"p6":.3, "p7":.6, "p4":.1},
-            "p7":{"p8":1}
-        }
-        p_m2, q_m2 = generate_pq()
-        mc_1_transition={
-            "p2":{"p4":p_m2, "p2":q_m2},
-            "p4":{"p4": .3, "p6": .35, "p2":.35},
-            "p6":{"p6":.7, "p4":.3}
-        }
-
-        mc_1=MC(init="p2", transitions=mc_1_transition, states=["p2", "p4", "p6"], labels={"p2":2, "p4":4, "p6":6})
-        mc_2=MC(init="p2", transitions=mc_2_transition, states=["p2", "p3", "p4", "p5", "p6", "p7", "p8"], labels={"p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7, "p8":8})
-
         analyzer=Analyzer()
 
-        mcs={0:{'mc':mc_1, 'prob': 0.5}, 1:{'mc':mc_2, 'prob': 0.5}}
+        mcs=analyzer.get_set_of_mcs(5)
         
         # print("composed done") 
         # property_tobe_verfied='Pmax=?[!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7")) U "goal"]'
-        property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal"]'
+        # property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal"]'
         # property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7"))) U "goal"]'
-        
+        property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal"]'
         autonomous_agent=Agent(mcs=mcs,  template_model=template_model, limit=9, formula=property_tobe_verfied, env_model_name="env_model.nm", discretized_road=["p3","p5", "p7", "p8"], combined_model_name='final_combined_model.nm')
         autonomous_agent.get_agent_model()
 
@@ -74,34 +53,14 @@ if __name__=="__main__":
         belief_model_prob=result.at(initial_state)
 
         # model for human agent 
-        p2, q2, r2 = generate_pqr()
-        
-        mc_2_transition_human={
-            "p2":{"p3":p2, "p2":q2, "p4":r2},
-            "p3": {"p8":1}, 
-            "p8": {"p8":1}, 
-            "p4": {"p4":.3, "p2":0.05, "p5":.6, "p6":.05}, 
-            "p5":{"p8": 1},
-            "p6":{"p6":.3, "p7":.6, "p4":.1},
-            "p7":{"p8":1}
-        }
 
-        p2_m2, q2_m2 = generate_pq()
-        mc_1_transition_human={
-            "p2":{"p4":p2_m2, "p2":q2_m2},
-            "p4":{"p4": .3, "p6": .35, "p2":.35},
-            "p6":{"p6":.7, "p4":.3}
-        }
-
-
-        mc_1_human=MC(init="p2", transitions=mc_1_transition_human, states=["p2", "p4", "p6"], labels={"p2":2, "p4":4, "p6":6})
-        mc_2_human=MC(init="p2", transitions=mc_2_transition_human, states=["p2", "p3", "p4", "p5", "p6", "p7", "p8"], labels={"p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7, "p8":8})
-    
-
+        # formula_human='Pmax=?[(!(("h3" & "p3") | ("h5" & "p5") | ("h7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal2"]'
+        formula_human='Pmax=?[(!(("h3" & "p3") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal2"]'
         analyzer2=Analyzer()
-        formula_human='Pmax=?[(!(("h3" & "p3") | ("h5" & "p5") | ("h7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal2"]'
+        mcs_human=analyzer2.get_set_of_mcs(5)
+        
 
-        mcs_human={0:{'mc':mc_1_human, 'prob': 0.5}, 1:{'mc':mc_2_human, 'prob': 0.5}}
+        # mcs_human={0:{'mc':mc_1_human, 'prob': 0.5}, 1:{'mc':mc_2_human, 'prob': 0.5}}
         human_agent=Agent(mcs=mcs_human,  template_model=template_model, limit=9, formula=formula_human, env_model_name="env_model_human.nm", discretized_road=["p3","p5", "p7", "p8"], combined_model_name='final_combined_model_human.nm')
         autonomous_agent.get_agent_model()
 
