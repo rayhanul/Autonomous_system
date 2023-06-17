@@ -231,6 +231,9 @@ class Belief:
         self.initial_belief_state=(mcs[0]['mc'].init, init_belief)
 
     def tau(self, current_state, next_state, current_belief):
+        '''
+        this tau is based on past history
+        '''
 
         current_belief_distribution=self.all_beliefs[current_belief]
 
@@ -266,7 +269,52 @@ class Belief:
 
         return next_b 
 
+    def tau2(self, current_state, next_state, current_belief):
+        '''
+        this tau is based on next states reachable from next state
+        '''
+
+        current_belief_distribution=self.all_beliefs[current_belief]
+
+        all_next_states=self.get_all_next_states(next_state)
+
+        next_belief_distribution={}
+
+        for idx, mc in self.mcs.items():
+            prob=0
+            try:
+                belief_prob=current_belief_distribution[idx] 
+            except:
+                belief_prob=0
+            for state in all_next_states:
+                if mc['mc'].has_transition(next_state, state):
+                    prob += belief_prob * mc['mc'].get_transition_probability(next_state, state)
+                    
+            next_belief_distribution.update({idx:prob})
+
+        # normalize the next_belief_distribution 
+        total=sum(next_belief_distribution.values())
+        normalized_next_belief_distribution={}
+        for idx, val in next_belief_distribution.items():
+            norm_val=val/total
+            normalized_next_belief_distribution.update({idx:norm_val})
         
+        number_beliefs=len(self.all_beliefs)
+        next_b='b'+str(number_beliefs)
+
+        # update belief if not in withing given threshold... 
+        flag, belief_name, next_belief = self.get_Belief_within_threshold(next_b, normalized_next_belief_distribution, threshold=0.05)
+        if not flag:
+            self.all_beliefs.update({next_b:normalized_next_belief_distribution})
+        else: 
+            next_b=belief_name
+
+        return next_b 
+
+
+
+
+
     def get_Belief_within_threshold(self, belief, belief_distribution, threshold):
 
         belief_name=None 
@@ -295,7 +343,7 @@ class Belief:
             all_next_states=self.get_all_next_states(elem[0])
             transition={}
             for state in all_next_states:
-                next_belief = self.tau(elem[0], state, elem[1])
+                next_belief = self.tau2(elem[0], state, elem[1])
                 
                 next_belief_state=(state, next_belief)
                 if not next_belief_state in visited :
