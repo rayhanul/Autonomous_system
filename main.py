@@ -15,7 +15,7 @@ from Agent import *
 
 if __name__=="__main__":
 
-    numiter=100
+    numiter=500
     counterarray= [0 for _ in range(numiter)]
     data_out = dict()
 
@@ -91,7 +91,7 @@ if __name__=="__main__":
         original_model_prob=result.at(initial_state)
 
 
-        print(f"result at iteration: {iter}, Autonomous prob. {belief_model_prob}, human prob: {belief_model_prob_human} original prob after applying policies: {original_model_prob}")
+        print(f"result at iteration: {iter}, Autonomous prob. {belief_model_prob}, human prob: {belief_model_prob_human}, True system: {original_model_prob}")
 
         data_out.update({(belief_model_prob, belief_model_prob_human): original_model_prob})
 

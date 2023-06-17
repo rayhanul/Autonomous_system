@@ -5,11 +5,6 @@ from Prism_model_generator import *
 from finite_mc import * 
 
 
-
-
-
-
-
 class Agent:
 
     def __init__(self, number_mcs, analyzer, belief_manager, template_model, env_model_name, combined_model_name='final_combined_model.nm' ):
@@ -134,10 +129,9 @@ class Agent:
             deterministic_choice=result.scheduler.get_choice(s_i).get_deterministic_choice()
             transition_at_s_i = model.states[s_i].actions[deterministic_choice].transitions
             hold_state = model.states[int(re.findall('\\d+',str(transition_at_s_i))[0])]
-            # print(model.states[s_i].labels)
+
             next_action = result.scheduler.get_choice(hold_state).get_deterministic_choice()
             next_state = model.states[int(re.findall('\\d+', str(hold_state.actions[int(next_action)].transitions))[0])]
-            # print(next_state)
             # if 'crash' not in next_state.labels and 'goal' not in next_state.labels:
             text= not analyzer.is_crush_exist(next_state.labels)
             # print(text)
