@@ -12,15 +12,12 @@ from finite_mc import *
 
 class Agent:
 
-    def __init__(self, number_mcs, analyzer, belief_manager, template_model, limit, env_model_name, discretized_road, combined_model_name='final_combined_model.nm' ):
+    def __init__(self, number_mcs, analyzer, belief_manager, template_model, env_model_name, combined_model_name='final_combined_model.nm' ):
         
         self.mcs=analyzer.get_set_of_mcs(number_mcs)  
         self.analyzer=analyzer
         self.belief_manager=belief_manager
         self.template_model=template_model
-        self. discretized_road=discretized_road
-        self.limit=limit 
-        self.selected_mc=1 
         self.combined_model_name=combined_model_name
         self.env_model_name=env_model_name
         self.formula=''
@@ -28,19 +25,18 @@ class Agent:
 
     
 
-
-
-
     def get_agent_model(self):
 
-        new_belief=Belief(self.mcs)
-        b3= new_belief.get_complete_environment_model()
+        # belief=Belief(self.mcs)
+        belief=BeliefTransition(self.analyzer.get_mcs_control_paper())
 
-        b_transition=BeliefTransition(self.mcs, self.selected_mc,  self.limit, self.discretized_road )
-        self.belief_manager=new_belief 
+        b3= belief.get_complete_environment_model()
+
+        
+        self.belief_manager=belief 
         self.transition=b3 
 
-        old_states, b3_mc=new_belief.get_complete_MC(b3, new_belief.initial_belief_state )
+        old_states, b3_mc=belief.get_complete_MC(b3, belief.initial_belief_state )
 
         # b3=b_transition.get_complete_environment_model(b_transition.initial_belief_state)
         # old_states, b3_mc=b_transition.get_complete_MC(b3, b_transition.initial_belief_state )

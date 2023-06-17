@@ -7,7 +7,7 @@ import numpy as np
 import math 
 
 class BeliefTransition:
-    def __init__(self, mcs, selected_mc, limit, discretized_road, mcs_states=None, init_belief='b6'):
+    def __init__(self, mcs, selected_mc=1, limit=9, discretized_road=["p3","p5", "p7", "p8"], mcs_states=None, init_belief='b6'):
         """
         mcs-list of MCs
         """
@@ -104,11 +104,11 @@ class BeliefTransition:
                 reachable_transition.update({key:item})
         return reachable_transition
     
-    def get_complete_environment_model(self, init_belief):
+    def get_complete_environment_model(self):
 
         visited=[]
         transitions={}
-
+        init_belief=self.initial_belief_state
         Q=deque()
         Q.append(init_belief)
 

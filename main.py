@@ -15,7 +15,7 @@ from Agent import *
 
 if __name__=="__main__":
 
-    numiter=200
+    numiter=20
     counterarray= [0 for _ in range(numiter)]
     data_out = dict()
 
@@ -27,7 +27,7 @@ if __name__=="__main__":
 
         # model for Autonomous agent...  
         analyzer=Analyzer()
-
+        
         # new_belief=Belief(self.mcs)
         # b3= new_belief.get_complete_environment_model()
 
@@ -38,7 +38,7 @@ if __name__=="__main__":
         property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal"]'
         # property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7"))) U "goal"]'
         # property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal"]'
-        autonomous_agent=Agent(number_mcs=3, analyzer=analyzer, belief_manager="", template_model=template_model, limit=9, env_model_name="env_model.nm", discretized_road=["p3","p5", "p7", "p8"], combined_model_name='final_combined_model.nm')
+        autonomous_agent=Agent(number_mcs=3, analyzer=analyzer, belief_manager="", template_model=template_model, env_model_name="env_model.nm", combined_model_name='final_combined_model.nm')
         autonomous_agent.get_agent_model()
 
         formula=autonomous_agent.getFormula(agent_type='autonomous')
@@ -64,7 +64,7 @@ if __name__=="__main__":
         mcs_human=analyzer2.get_set_of_mcs(5)
         
         # mcs_human={0:{'mc':mc_1_human, 'prob': 0.5}, 1:{'mc':mc_2_human, 'prob': 0.5}}
-        human_agent=Agent(number_mcs=3, analyzer=analyzer2, belief_manager="", template_model=template_model, limit=9, env_model_name="env_model_human.nm", discretized_road=["p3","p5", "p7", "p8"], combined_model_name='final_combined_model_human.nm')
+        human_agent=Agent(number_mcs=3, analyzer=analyzer2, belief_manager="", template_model=template_model,env_model_name="env_model_human.nm", combined_model_name='final_combined_model_human.nm')
         human_agent.get_agent_model()
         formula=human_agent.getFormula(agent_type='human')
         
