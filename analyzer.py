@@ -126,98 +126,57 @@ class Analyzer:
 
         return mcs 
 
-# def get_policies(analyzer, model, result, actions):
-#     Agent1_pol = dict()
-#     Agent2_pol = dict()
+    def create_dtmc_model_using_policies(self, Agent1_pol, Agent2_pol, true_env_model, template_file, output_dtmc_file):
+        tc_dtmc = output_dtmc_file
+        tc_dtmc = os.path.join(self.model_path, tc_dtmc)
+        template= os.path.join(self.model_path, template_file)
 
-#     move_ids = [m_s.id for m_s in model.states for s_i in m_s.labels if 'go' in s_i or 'stop' in s_i]
-
-#     action_points = set(range(model.nr_states)) - set(move_ids)
-#     actions1 = actions
-#     actions2 = ['go2','stop2']
-
-#     for s_i in action_points:
-#         # print(model.states[s_i].labels)
-
-#         for l_i in model.states[s_i].labels:
-#             if 'a' in l_i:
-#                 s_state = l_i
-#             elif 'h' in l_i:
-#                 x_state = l_i
-#             elif 'p' in l_i:
-#                 p_state = l_i
-
-#         deterministic_choice=result.scheduler.get_choice(s_i).get_deterministic_choice()
-#         transition_at_s_i = model.states[s_i].actions[deterministic_choice].transitions
-#         hold_state = model.states[int(re.findall('\\d+',str(transition_at_s_i))[0])]
-#         # print(model.states[s_i].labels)
-#         next_action = result.scheduler.get_choice(hold_state).get_deterministic_choice()
-#         next_state = model.states[int(re.findall('\\d+', str(hold_state.actions[int(next_action)].transitions))[0])]
-#         # print(next_state)
-#         # if 'crash' not in next_state.labels and 'goal' not in next_state.labels:
-#         text= not analyzer.is_crush_exist(next_state.labels)
-#         # print(text)
-#         if not analyzer.is_crush_exist(next_state.labels) and 'goal' not in next_state.labels:
-#             act_tup = tuple()
-#             act_tuple1=[l_ind for l_ind,l_a in enumerate(actions1) if l_a in next_state.labels]
-#             # act_tuple2=[l_ind for l_ind,l_a in enumerate(actions2) if l_a in next_state.labels]
-#             if len(act_tuple1)>0 :
-#                 act_tup += (act_tuple1[0],)
-#                 # act_tup += (act_tuple2[0],)
-#                 Agent1_pol.update({(s_state, x_state, p_state): act_tup[0] })
-#     return Agent1_pol
-
-def create_dtmc_model_using_policies(analyzer, Agent1_pol, Agent2_pol, true_env_model, template_file):
-    tc_dtmc = "two_car_dtmc.prism"
-    tc_dtmc = os.path.join(analyzer.model_path, tc_dtmc)
-    template= os.path.join(analyzer.model_path, template_file)
-
-    with open(template) as f:
-        with open(tc_dtmc, "w+") as f1:
-            for line in f:
-                f1.write(line)
+        with open(template) as f:
+            with open(tc_dtmc, "w+") as f1:
+                for line in f:
+                    f1.write(line)
 
 
-    with open(tc_dtmc, 'a+') as dtmc_file:
-        dtmc_file.write("module car1policy\n\tc1_go1 : bool init false;\n\tc1_stop1 : bool init false;\n\n\t[go] c1_go1 -> 1:(c1_go1'=false);\n\t[stop] c1_stop1 -> 1:(c1_stop1'=false);\n")
-        pol1_lead = "\t[assign] !carpol1 &"
-        out1_ind = ["(c1_go1'=true);\n","(c1_stop1'=true);\n"]
+        with open(tc_dtmc, 'a+') as dtmc_file:
+            dtmc_file.write("module car1policy\n\tc1_go1 : bool init false;\n\tc1_stop1 : bool init false;\n\n\t[go] c1_go1 -> 1:(c1_go1'=false);\n\t[stop] c1_stop1 -> 1:(c1_stop1'=false);\n")
+            pol1_lead = "\t[assign] !carpol1 &"
+            out1_ind = ["(c1_go1'=true);\n","(c1_stop1'=true);\n"]
 
-        for s_z, x, p in Agent1_pol:
-            s_num = int(s_z[1:])
-            x_num = int(x[1:])
-            p_num = int(p[1:])
+            for s_z, x, p in Agent1_pol:
+                s_num = int(s_z[1:])
+                x_num = int(x[1:])
+                p_num = int(p[1:])
 
-            state_in = "(a={}) & (h={}) & (p={}) -> ".format(s_num, x_num, p_num)
-            pol_ind = 0 if Agent1_pol[(s_z, x, p)] == int(0) else 1
-            dtmc_file.write(pol1_lead + state_in + out1_ind[pol_ind])
+                state_in = "(a={}) & (h={}) & (p={}) -> ".format(s_num, x_num, p_num)
+                pol_ind = 0 if Agent1_pol[(s_z, x, p)] == int(0) else 1
+                dtmc_file.write(pol1_lead + state_in + out1_ind[pol_ind])
 
-        dtmc_file.write('endmodule\n')
+            dtmc_file.write('endmodule\n')
 
-        dtmc_file.write("module car2policy\n\tc2_go2 : bool init false;\n\tc2_stop2 : bool init false;\n\n\t[go2] c2_go2 -> 1:(c2_go2'=false);\n\t[stop2] c2_stop2 -> 1:(c2_stop2'=false);\n")
-        pol2_lead = "\t[assign] !carpol2 &"
-        out2_ind = ["(c2_go2'=true);\n", "(c2_stop2'=true);\n"]
+            dtmc_file.write("module car2policy\n\tc2_go2 : bool init false;\n\tc2_stop2 : bool init false;\n\n\t[go2] c2_go2 -> 1:(c2_go2'=false);\n\t[stop2] c2_stop2 -> 1:(c2_stop2'=false);\n")
+            pol2_lead = "\t[assign] !carpol2 &"
+            out2_ind = ["(c2_go2'=true);\n", "(c2_stop2'=true);\n"]
 
-        for s_z, x, p in Agent2_pol:
-            s_num = int(s_z[1:])
-            x_num = int(x[1:])
-            p_num = int(p[1:])
+            for s_z, x, p in Agent2_pol:
+                s_num = int(s_z[1:])
+                x_num = int(x[1:])
+                p_num = int(p[1:])
 
-            state_in = "(a={}) & (h={}) & (p={}) -> ".format(s_num, x_num, p_num)
-            pol_ind = 0 if Agent2_pol[(s_z, x, p)] == int(0) else 1
-            dtmc_file.write(pol2_lead + state_in + out2_ind[pol_ind])
+                state_in = "(a={}) & (h={}) & (p={}) -> ".format(s_num, x_num, p_num)
+                pol_ind = 0 if Agent2_pol[(s_z, x, p)] == int(0) else 1
+                dtmc_file.write(pol2_lead + state_in + out2_ind[pol_ind])
 
-        dtmc_file.write('endmodule\n')
+            dtmc_file.write('endmodule\n')
 
 
-    search_text='%env_model%'
+        search_text='%env_model%'
 
-    with open(tc_dtmc, 'r') as file:
-        data=file.read()
-        data=data.replace(search_text, true_env_model)
+        with open(tc_dtmc, 'r') as file:
+            data=file.read()
+            data=data.replace(search_text, true_env_model)
 
-    with open(tc_dtmc, 'w') as file2:
-        file2.write(data)
+        with open(tc_dtmc, 'w') as file2:
+            file2.write(data)
 
 
 

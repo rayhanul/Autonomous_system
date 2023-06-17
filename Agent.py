@@ -27,8 +27,8 @@ class Agent:
 
     def get_agent_model(self):
 
-        # belief=Belief(self.mcs)
-        belief=BeliefTransition(self.analyzer.get_mcs_control_paper())
+        belief=Belief(self.mcs)
+        # belief=BeliefTransition(self.analyzer.get_mcs_control_paper())
 
         b3= belief.get_complete_environment_model()
 
