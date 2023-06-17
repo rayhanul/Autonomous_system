@@ -56,9 +56,9 @@ class Analyzer:
     def get_set_of_mcs(self, number_mcs):
 
         mcs={}
-        for index in range(number_mcs):
+        for index in range(2*number_mcs):
+            
             # p, q, r = generate_pqr()
-        
             # mc_2_transition={
             #     "p2":{"p3":p, "p2":q, "p4":r},
             #     "p3": {"p8":1}, 
@@ -68,12 +68,17 @@ class Analyzer:
             #     "p6":{"p6":.3, "p7":.6, "p4":.1},
             #     "p7":{"p8":1}
             # }
+            # mc=MC(init="p2", transitions=mc_2_transition, states=["p2", "p3", "p4", "p5", "p6", "p7", "p8"], labels={"p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7, "p8":8})
+            # mcs.update({index:{'mc':mc, 'prob':1/(2*number_mcs)}})
+            
             # p_m2, q_m2 = generate_pq()
             # mc_1_transition={
             #     "p2":{"p4":p_m2, "p2":q_m2},
             #     "p4":{"p4": .3, "p6": .35, "p2":.35},
             #     "p6":{"p6":.7, "p4":.3}
             # }
+            # mc=MC(init="p2", transitions=mc_1_transition, states=["p2", "p3", "p4", "p5", "p6", "p7", "p8"], labels={"p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7, "p8":8})
+            # mcs.update({index:{'mc':mc, 'prob':1/(2*number_mcs)}})
 
             p = generate_p()
 
@@ -85,8 +90,9 @@ class Analyzer:
 
             # mc_1=MC(init="p2", transitions=mc_1_transition, states=["p2", "p4", "p6"], labels={"p2":2, "p4":4, "p6":6})
             # mc_2=MC(init="p2", transitions=mc_transition, states=["p2", "p3", "p4", "p5", "p6", "p7", "p8"], labels={"p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7, "p8":8})
-            mc_2=MC(init="p2", transitions=mc_transition, states=["p2", "p3", "p8"], labels={"p2":2, "p3":3, "p8":8})
-            mcs.update({index:{'mc':mc_2, 'prob':1/number_mcs}})
+            
+            mc=MC(init="p2", transitions=mc_transition, states=["p2", "p3", "p8"], labels={"p2":2, "p3":3, "p8":8})
+            mcs.update({index:{'mc':mc, 'prob':1/(2*number_mcs)}})
 
             # mcs={0:{'mc':mc_1, 'prob': 0.5}, 1:{'mc':mc_2, 'prob': 0.5}}
 

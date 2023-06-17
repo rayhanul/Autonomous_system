@@ -10,12 +10,12 @@ import stormpy
 
 import matplotlib.pyplot as plt 
 import time 
-from system_analyzer import * 
+from analyzer import * 
 from Agent import * 
 
 if __name__=="__main__":
 
-    numiter=300
+    numiter=200
     counterarray= [0 for _ in range(numiter)]
     data_out = dict()
 
@@ -28,16 +28,20 @@ if __name__=="__main__":
         # model for Autonomous agent...  
         analyzer=Analyzer()
 
-        mcs=analyzer.get_set_of_mcs(5)
+        # new_belief=Belief(self.mcs)
+        # b3= new_belief.get_complete_environment_model()
+
+        # b_transition=BeliefTransition(self.mcs, self.selected_mc,  self.limit, self.discretized_road )
         
         # print("composed done") 
         # property_tobe_verfied='Pmax=?[!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7")) U "goal"]'
-        # property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal"]'
+        property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal"]'
         # property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a5" & "p5") | ("a7" & "p7"))) U "goal"]'
-        property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal"]'
-        autonomous_agent=Agent(mcs=mcs,  template_model=template_model, limit=9, formula=property_tobe_verfied, env_model_name="env_model.nm", discretized_road=["p3","p5", "p7", "p8"], combined_model_name='final_combined_model.nm')
+        # property_tobe_verfied='Pmax=?[(!(("a3" & "p3") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal"]'
+        autonomous_agent=Agent(number_mcs=3, analyzer=analyzer, belief_manager="", template_model=template_model, limit=9, env_model_name="env_model.nm", discretized_road=["p3","p5", "p7", "p8"], combined_model_name='final_combined_model.nm')
         autonomous_agent.get_agent_model()
 
+        formula=autonomous_agent.getFormula(agent_type='autonomous')
 
         path=os.path.join(analyzer.model_path, 'final_combined_model.nm')
 
@@ -54,16 +58,15 @@ if __name__=="__main__":
 
         # model for human agent 
 
-        # formula_human='Pmax=?[(!(("h3" & "p3") | ("h5" & "p5") | ("h7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal2"]'
-        formula_human='Pmax=?[(!(("h3" & "p3") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal2"]'
+        formula_human='Pmax=?[(!(("h3" & "p3") | ("h5" & "p5") | ("h7" & "p7")| ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal2"]'
+        # formula_human='Pmax=?[(!(("h3" & "p3") | ("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "goal2"]'
         analyzer2=Analyzer()
         mcs_human=analyzer2.get_set_of_mcs(5)
         
-
         # mcs_human={0:{'mc':mc_1_human, 'prob': 0.5}, 1:{'mc':mc_2_human, 'prob': 0.5}}
-        human_agent=Agent(mcs=mcs_human,  template_model=template_model, limit=9, formula=formula_human, env_model_name="env_model_human.nm", discretized_road=["p3","p5", "p7", "p8"], combined_model_name='final_combined_model_human.nm')
-        autonomous_agent.get_agent_model()
-
+        human_agent=Agent(number_mcs=3, analyzer=analyzer2, belief_manager="", template_model=template_model, limit=9, env_model_name="env_model_human.nm", discretized_road=["p3","p5", "p7", "p8"], combined_model_name='final_combined_model_human.nm')
+        human_agent.get_agent_model()
+        formula=human_agent.getFormula(agent_type='human')
         
         path_human=os.path.join(analyzer2.model_path, 'final_combined_model.nm')
 
