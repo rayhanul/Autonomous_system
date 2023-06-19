@@ -84,7 +84,7 @@ class Analyzer:
     def get_set_of_mcs(self, number_mcs):
 
         mcs={}
-        for index in range(2*number_mcs):
+        for index in range(number_mcs):
             
             # p, q, r = generate_pqr()
             # mc_2_transition={

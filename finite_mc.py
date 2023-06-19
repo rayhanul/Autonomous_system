@@ -283,13 +283,14 @@ class Belief:
         for idx, mc in self.mcs.items():
             prob=0
             try:
+                transition_prob_current_belief=mc['mc'].transitions[current_state][next_state]
                 belief_prob=current_belief_distribution[idx] 
             except:
                 belief_prob=0
             for state in all_next_states:
                 if mc['mc'].has_transition(next_state, state):
-                    prob += belief_prob * mc['mc'].get_transition_probability(next_state, state)
-                    
+                    prob +=  mc['mc'].get_transition_probability(next_state, state)
+            prob= transition_prob_current_belief * belief_prob * prob
             next_belief_distribution.update({idx:prob})
 
         # normalize the next_belief_distribution 
