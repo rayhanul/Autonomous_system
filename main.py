@@ -15,7 +15,8 @@ from Agent import *
 
 if __name__=="__main__":
 
-    numiter=500
+    numiter=50
+    number_mcs=5
     counterarray= [0 for _ in range(numiter)]
     data_out = dict()
 
@@ -28,7 +29,7 @@ if __name__=="__main__":
         # model for Autonomous agent...  
         analyzer=Analyzer()
     
-        autonomous_agent=Agent(number_mcs=3, analyzer=analyzer, belief_manager="", template_model=template_model, env_model_name="env_model.nm", combined_model_name='final_combined_model.nm')
+        autonomous_agent=Agent(number_mcs=number_mcs, analyzer=analyzer, belief_manager="", template_model=template_model, env_model_name="env_model.nm", combined_model_name='final_combined_model.nm')
         autonomous_agent.get_agent_model()
 
         formula=autonomous_agent.getFormula(agent_type='autonomous')
@@ -50,9 +51,9 @@ if __name__=="__main__":
 
 
         analyzer2=Analyzer()
-        mcs_human=analyzer2.get_set_of_mcs(5)
+        # mcs_human=analyzer2.get_set_of_mcs(number_mcs)
         
-        human_agent=Agent(number_mcs=3, analyzer=analyzer2, belief_manager="", template_model=template_model,env_model_name="env_model_human.nm", combined_model_name='final_combined_model_human.nm')
+        human_agent=Agent(number_mcs=number_mcs, analyzer=analyzer2, belief_manager="", template_model=template_model,env_model_name="env_model_human.nm", combined_model_name='final_combined_model_human.nm')
         human_agent.get_agent_model()
         formula=human_agent.getFormula(agent_type='human')
         
