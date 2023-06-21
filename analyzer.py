@@ -39,6 +39,7 @@ class Analyzer:
 
     def is_crush_exist(self, labels):
         # condition to be crush = 3, 5, 7
+        road=[3,5,7]
         for label in labels:
             if 'a' in label:
                 autonomous_state = label
@@ -48,11 +49,25 @@ class Analyzer:
                 pedestrian_state = label
         if autonomous_state[1] == humand_car_state[1]:
             return True
-
-        if autonomous_state[1] == pedestrian_state[1]:
+        
+        if humand_car_state[1]==pedestrian_state[1] and pedestrian_state in road :
+            return True
+        
+        if autonomous_state[1] == pedestrian_state[1] and pedestrian_state in road:
             return True 
+        
         return False 
     
+    def get_mcs(self, number_mcs, env_model_type):
+
+        if env_model_type=='original':
+            return self.get_mcs_original_paper()
+        elif env_model_type=='control' :
+            return self.get_mcs_control_paper()
+        else :
+            return self.get_set_of_mcs(number_mcs)
+
+
     def get_mcs_control_paper(self):
 
         mcs={}
@@ -80,8 +95,27 @@ class Analyzer:
 
         return mcs 
 
+    def get_mcs_original_paper(self):
 
+        mcs={}
+        p = generate_p()
+        # p=.8
+
+        mc_transition={
+            "p2":{"p3":p, "p2":1-p},
+            "p3":{"p2": p/2, "p3": 1-p, "p8":p/2},
+            "p8":{"p8":1-p, "p3":p}
+        }
+
+        mc=MC(init="p2", transitions=mc_transition, states=["p2", "p3", "p8"], labels={"p2":2, "p3":3, "p8":8})
+        mcs.update({0:{'mc':mc, 'prob':1}})
+
+        return mcs 
     def get_set_of_mcs(self, number_mcs):
+
+        '''
+        return set of mc models to represent the behavior of pedestrian
+        '''
 
         mcs={}
         for index in range(number_mcs):

@@ -7,9 +7,9 @@ from finite_mc import *
 
 class Agent:
 
-    def __init__(self, number_mcs, analyzer, belief_manager, template_model, env_model_name, combined_model_name='final_combined_model.nm' ):
+    def __init__(self, number_mcs, analyzer, belief_manager, template_model, belief_type, env_model_type, env_model_name, combined_model_name='final_combined_model.nm' ):
         
-        self.mcs=analyzer.get_set_of_mcs(number_mcs)  
+        self.mcs=analyzer.get_mcs(number_mcs, env_model_type)  
         self.analyzer=analyzer
         self.belief_manager=belief_manager
         self.template_model=template_model
@@ -17,32 +17,50 @@ class Agent:
         self.env_model_name=env_model_name
         self.formula=''
         self.transition=''
+        self.belief_type=belief_type
+        self.env_model_type=env_model_type
+        self.labels={}
+        self.number_states=6
 
     
 
     def get_agent_model(self):
 
-        belief=Belief(self.mcs)
-        # belief=BeliefTransition(self.analyzer.get_mcs_control_paper())
+        if self.env_model_type=='original':
+            prism_model_generator=Prism_Model_Generator(self.mcs, self.mcs[0]['mc'].labels, self.number_states)
 
-        b3= belief.get_complete_environment_model()
+            self.belief_manager=''
+            self.transition=self.mcs[0]['mc'].transitions
+            environment_prism_model=prism_model_generator.get_prism_model_original()
+        else :
 
-        
-        self.belief_manager=belief 
-        self.transition=b3 
+            if self.belief_type=='dynamic':
+                belief=Belief(self.mcs)
+            else: 
+                belief=BeliefTransition(self.analyzer.get_mcs_control_paper())
 
-        old_states, b3_mc=belief.get_complete_MC(b3, belief.initial_belief_state )
+            b3= belief.get_complete_environment_model()
 
-        # b3=b_transition.get_complete_environment_model(b_transition.initial_belief_state)
-        # old_states, b3_mc=b_transition.get_complete_MC(b3, b_transition.initial_belief_state )
-        
-        prism_model_generator=Prism_Model_Generator(b3_mc, old_states)
-        environment_prism_model=prism_model_generator.get_prism_model()
-        # analyzer=Analyzer()
+            
+            self.belief_manager=belief 
+            self.transition=b3 
+
+            old_states, b3_mc=belief.get_complete_MC(b3, belief.initial_belief_state )
+
+            # b3=b_transition.get_complete_environment_model(b_transition.initial_belief_state)
+            # old_states, b3_mc=b_transition.get_complete_MC(b3, b_transition.initial_belief_state )
+            
+            prism_model_generator=Prism_Model_Generator(b3_mc, old_states, self.number_states)
+            environment_prism_model=prism_model_generator.get_prism_model()
+
+            # analyzer=Analyzer()
         self.analyzer.writeToFile(environment_prism_model, self.env_model_name )
         self.analyzer.create_combined_model(environment_prism_model, self.template_model, self.combined_model_name)
         
-    def getFormula(self, agent_type):
+    def getFormula(self, agent_type, env_model_type):
+        '''
+        return the formula to be varified dynamically based on the position of the pedestrian
+        '''
         formula = ""
         location_variable=''
 
@@ -51,14 +69,19 @@ class Agent:
             goal='goal'
         else :
             location_variable = 'h'
-            goal='goal2'
+            goal='goal'
         header='Pmax=?[(!('
-        footer=f'("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "{goal}"]'
+        # footer=f'("a3" & "h3") | ("a5" & "h5") | ("a7" & "h7"))) U "{goal}"]'
+        footer=f'("a0" & "h0") | ("a1" & "h1") | ("a2" & "h2") | ("a3" & "h3"))) U "{goal}"]'
 
-        all_belief_states=self.belief_manager.get_all_states(self.transition)
-        all_states=[beleif_state[0] for beleif_state in all_belief_states]
+        if env_model_type=='original':
+            all_states=list(self.transition.keys())
+        else :
+            all_belief_states=self.belief_manager.get_all_states(self.transition)
+            all_states=[beleif_state[0] for beleif_state in all_belief_states]
         
-        road=['p3', 'p5', 'p7']
+        # road=['p3', 'p5', 'p7']
+        road=['p0', 'p1', 'p2', 'p3', 'p4']
         
         common_states=list(set(all_states).intersection(set(road)))
 
@@ -84,6 +107,9 @@ class Agent:
         return selected_mcs
     
     def get_EnvironmentModel(self):
+        '''
+        return the environment model 
+        '''
         selected_mc=self.chooseEnvironmentModel()
 
         model=f'module pedestrian \n \t p : [2..10] init 2;'
@@ -103,17 +129,41 @@ class Agent:
         model=model + 'endmodule' 
         return model              
 
+    def get_environment_original(self):
 
+        p=.75
+        mc_transition={
+            "p2":{"p3":p, "p2":1-p},
+            "p3":{"p2": p/2, "p3": 1-p, "p8":p/2},
+            "p8":{"p8":p, "p3":1-p}
+        }
+
+        model=f'module pedestrian \n \t p : [2..10] init 2;'
+
+        for idx, transition in mc_transition.items():
+            idx=int(idx[1:len(idx)])
+            trans=f'\t[move] (p={idx}) -> '
+            for index, val in transition.items():
+                index=int(index[1:len(index)])
+                moves= f'{val}:(p\'={index})'
+
+                trans = trans + moves + '+'
+            trans=trans[:-1]
+            trans=trans+';\n'  
+            model=model+trans  
+
+        model=model + 'endmodule' 
+        return model 
             
     def get_policies(self, analyzer, model, result, actions):
+        '''
+        return the policies of an agent 
+        '''
         Agent1_pol = dict()
-        Agent2_pol = dict()
-
         move_ids = [m_s.id for m_s in model.states for s_i in m_s.labels if 'go' in s_i or 'stop' in s_i]
 
         action_points = set(range(model.nr_states)) - set(move_ids)
         actions1 = actions
-        actions2 = ['go2','stop2']
 
         for s_i in action_points:
             # print(model.states[s_i].labels)

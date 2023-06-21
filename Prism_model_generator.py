@@ -3,18 +3,48 @@ import os
 
 class Prism_Model_Generator:
 
-    def __init__(self, mc, old_states) :
+    def __init__(self, mc, old_states, number_states) :
         self.mc=mc
         self.old_states=old_states
         self.state_mapping={}  
         self.prism_program=""
+        self.number_states=number_states
+
+    def get_prism_model_original(self):
+
+        self.prism_program='\n' 
+        init=self.mc[0]['mc'].init[1] 
+        self.prism_program += f'const int k ={self.number_states}; \n module environment \n p : [0..k] init {init};\n'
+        transitions=self.mc[0]['mc'].transitions
+        moves=' '
+
+        for idx, transition in transitions.items():
+            next_trans=''
+            outer_id=idx.replace('p', '')
+            for id, prob in transition.items():
+                inner_id=id.replace('p', '')
+                next_trans +=f'{prob} : (p\'={inner_id}) +'
+            next_trans=next_trans[:-1]
+            next_trans+='; \n'
+            moves = moves +  f'[move] (p={outer_id}) ->  {next_trans}'
+        self.prism_program +=moves 
+        self.prism_program +='endmodule \n'
+
+        # setting label 
+        labels='\n'
+        for idx, val in self.old_states.items():
+            labels += f'label {idx}= (p={val});\n' 
+        self.prism_program += labels  
+
+        return self.prism_program 
+    
 
     def get_prism_model(self):
         # for 
         # self.prism_program +='dtmc\n'
         self.prism_program+='\n'
         init =self.mc.init.replace('x','')
-        self.prism_program += f'const int k ={len(self.old_states)}; \n module environment \n p : [0..k] init {init};\n'
+        self.prism_program += f'const int k ={len(self.number_states)}; \n module environment \n p : [0..k] init {init};\n'
         moves=' '
         for idx, transition in self.mc.transitions.items():
             next_trans=''
