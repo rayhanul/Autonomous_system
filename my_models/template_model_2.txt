@@ -76,8 +76,7 @@ label "h5" = (h=5);
 label "h7" = (h=7);
 label "h9" = (h=9);
 
-label "goal" = (a=9);
-label "goal2" = (h=9);
+label "goal" = (a=9) | (h=9);
 
 label "go1" = go_action;
 label "stop1" = stop_action;

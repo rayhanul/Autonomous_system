@@ -355,9 +355,17 @@ class Belief:
             if len(transition) > 0 :
                 transitions.update({elem:transition})
 
-        # return self.get_normalized_transition(transitions)
+        transition= self.get_normalized_transition(transitions)
         return transitions 
-    
+    def get_normalized_transition(self, transition):
+        updated_transition={}
+        for key, val in transition.items():
+            if sum(val.values()) != 0:
+                factor = 1.0/sum(val.values())
+                for inner_key, inner_val in val.items():
+                    val[inner_key]= round(factor * val[inner_key],2)
+                updated_transition.update({key:val})
+        return updated_transition 
 
 
     def get_all_next_states(self, state):

@@ -38,5 +38,5 @@ def generate_pq():
 
 
 def generate_p():
-        p=random.uniform(0,1)
+        p=random.uniform(1e-5, 1-1e-5)
         return p 

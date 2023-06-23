@@ -1,178 +1,156 @@
-
-dtmc 
-
+dtmc
 
 // Length of Street
-const int N=10;
+const int N=6;
 
+// pedestrian move probability
+//const double pL;
+//formula p_off = (s_p=0)|(s_p=2);
+//formula p_on = (s_p=1);
+formula crash = ((p=1)&((s=N-1)|(s2=N-1)))|(s=s2);
 formula action = go_action|stop_action;
 formula action2=go_action2|stop_action2;
 formula carpol1 = c1_go1|c1_stop1;
 formula carpol2 = c2_go2|c2_stop2;
-const double pL=.3;
 
-module autonomous_car
-	a : [1..N] init 1;
+module car
+	s : [0..N] init 1;
 	go_action : bool init false;
 	stop_action: bool init false;
-    assign_flag : bool init true;
-
+	assign_flag : bool init true;
+	
 	[assign] assign_flag -> (assign_flag'=false);
-
 	[go] !action& !assign_flag -> 1:(go_action'=true);
 	[stop] !action & !assign_flag -> 1:(stop_action'=true);
-
-	[move] (a=1)&go_action -> 0.9: (a'=3)&(go_action'=false) & (assign_flag'=true) + 0.1: (a'=1)&(go_action'=false) & (assign_flag'=true);
-	[move] (a=1)&stop_action -> 0.9: (a'=1)&(stop_action'=false) & (assign_flag'=true)+  0.1: (a'=3)&(stop_action'=false) & (assign_flag'=true);
-
-	[move] (a=3)&go_action -> 0.9: (a'=5)&(go_action'=false) & (assign_flag'=true) + 0.1: (a'=3)&(go_action'=false) & (assign_flag'=true);
-	[move] (a=3)&stop_action -> 0.9: (a'=3)&(stop_action'=false) & (assign_flag'=true)+  0.1: (a'=5)&(stop_action'=false) & (assign_flag'=true);
-
-
-	[move] (a=5)&go_action -> 0.9: (a'=7)&(go_action'=false) & (assign_flag'=true) + 0.1: (a'=5)&(go_action'=false) & (assign_flag'=true);
-	[move] (a=5)&stop_action -> 0.9: (a'=5)&(stop_action'=false) & (assign_flag'=true)+  0.1: (a'=7)&(stop_action'=false) & (assign_flag'=true);
-
-	[move] (a=7)&go_action -> 0.9: (a'=9)&(go_action'=false) & (assign_flag'=true)+ 0.1: (a'=7)&(go_action'=false) & (assign_flag'=true);
-	[move] (a=7)&stop_action -> 0.9: (a'=7)&(stop_action'=false) & (assign_flag'=true)+  0.1: (a'=7)&(stop_action'=false) & (assign_flag'=true);
-
-	[] (a=9) -> true;
-
-
-
+	[move] (s<N)&go_action -> (s'=s+1)&(go_action'=false)&(assign_flag'=true);
+	[move] (s<N)&stop_action -> (s'=s)&(stop_action'=false)&(assign_flag'=true);
+	[] (s=N) -> true;
 endmodule
 
-module human_car 
-	h : [0..N] init 0;
+module car2
+	s2 : [0..N] init 0;
 	go_action2 : bool init false;
 	stop_action2: bool init false;
 	assign_flag2 : bool init true;
-
+	
 	[assign] assign_flag2 -> (assign_flag2'=false);
 	[go2] !action2 & !assign_flag2 -> 1:(go_action2'=true);
 	[stop2] !action2 & !assign_flag2 -> 1:(stop_action2'=true);
-
-
-	[move] (h=0)&go_action2 -> 0.9: (h'=1)&(go_action2'=false) & (assign_flag2'=true)+ 0.1: (h'=0)&(go_action2'=false) & (assign_flag2'=true);
-	[move] (h=0)&stop_action2 -> 0.9: (h'=0)&(stop_action2'=false) & (assign_flag2'=true)+  0.1: (h'=1)&(stop_action2'=false) & (assign_flag2'=true);
-
-	[move] (h=1)&go_action2 -> 0.9: (h'=3)&(go_action2'=false) & (assign_flag2'=true) + 0.1: (h'=1)&(go_action2'=false) & (assign_flag2'=true);
-	[move] (h=1)&stop_action -> 0.9: (h'=1)&(stop_action2'=false) & (assign_flag2'=true)+  0.1: (h'=3)&(stop_action2'=false) & (assign_flag2'=true);
-
-	[move] (h=3)&go_action2 -> 0.9: (h'=5)&(go_action2'=false) & (assign_flag2'=true) + 0.1: (h'=3)&(go_action2'=false) & (assign_flag2'=true);
-	[move] (h=3)&stop_action2 -> 0.9: (h'=3)&(stop_action2'=false) & (assign_flag2'=true)+  0.1: (h'=5)&(stop_action2'=false) & (assign_flag2'=true);
-
-
-	[move] (h=5)&go_action2 -> 0.9: (h'=7)&(go_action2'=false) & (assign_flag2'=true) + 0.1: (h'=5)&(go_action2'=false) & (assign_flag2'=true);
-	[move] (h=5)&stop_action2 -> 0.9: (h'=5)&(stop_action2'=false) & (assign_flag2'=true)+  0.1: (h'=7)&(stop_action2'=false) & (assign_flag2'=true);
-
-	[move] (h=7)&go_action2 -> 0.9: (h'=9)&(go_action2'=false) & (assign_flag2'=true) + 0.1: (h'=7)&(go_action2'=false) & (assign_flag2'=true);
-	[move] (h=7)&stop_action2 -> 0.9: (h'=7)&(stop_action2'=false) & (assign_flag2'=true)+  0.1: (h'=7)&(stop_action2'=false) & (assign_flag2'=true);
-
-	[] (h=9) -> true;
-
-endmodule
-
-
-//module pedestrian
-//	p : [2..N] init 2;
-//	[move] (p=2) -> pL:(p'=3) + 1-pL:(p'=2);
-//	[move] (p=3) -> pL/2:(p'=2)+pL/2:(p'=8) + 1-pL:(p'=3);
-//	[move] (p=8) -> pL:(p'=3) + 1-pL:(p'=8); 
-
-
-	//[move] (p=2) -> 1:(p'=3) ;
-	//[move] (p=3) -> 1:(p'=8) ;
-	//[move] (p=8) ->  1:(p'=8); 
-
-	
-	//[move] (p=2) -> 1: (p'=2);
-
-//endmodule
-
-module pedestrian 
- 	 p : [2..10] init 2;	[move] (p=2) -> 0.03545083130521587:(p'=3)+0.9645491686947841:(p'=2);
-	[move] (p=3) -> 0.017725415652607934:(p'=2)+0.9645491686947841:(p'=3)+0.017725415652607934:(p'=8);
-	[move] (p=8) -> 0.9645491686947841:(p'=8)+0.03545083130521587:(p'=3);
+	[move] (s2<N)&go_action2 -> (s2'=s2+1)&(go_action2'=false)&(assign_flag2'=true);
+	[move] (s2<N)&stop_action2 -> (s2'=s2)&(stop_action2'=false)&(assign_flag2'=true);
+	[] (s2=N) -> true;
 endmodule
 
 
 
-label "a1" = (a=1);
-label "a3" = (a=3);
-label "a5" = (a=5);
-label "a7" = (a=7);
-label "a9" = (a=9);
+module environment
+ p: [0..3] init 0; 
+ 	 [move] (p=0) -> 0.5056282424694685:(p'=1) + 1-0.5056282424694685:(p'=0);
+	[move] (p=1) -> 0.5056282424694685/2:(p'=2)+0.5056282424694685/2:(p'=0) + 1-0.5056282424694685:(p'=1);
+[move] (p=2) -> 0.5056282424694685:(p'=1) + 1-0.5056282424694685:(p'=2); 
+endmodule
+ label "p0" = (p = 0);
+label "p1" = (p = 1); 
+ label "p2" = (p = 2);
 
-label "h0" = (h=0);
-label "h1" = (h=1);
-label "h3" = (h=3);
-label "h5" = (h=5);
-label "h7" = (h=7);
-label "h9" = (h=9);
+label "Goal" = (s=6)|(s2=6);
 
-label "goal" = (a=9) | (h=9);
+label "s0" = (s=0);
+label "s1" = (s=1);
+label "s2" = (s=2);
+label "s3" = (s=3);
+label "s4" = (s=4);
+label "s5" = (s=5);
+label "s6" = (s=6);
+
+label "x0" = (s2=0);
+label "x1" = (s2=1);
+label "x2" = (s2=2);
+label "x3" = (s2=3);
+label "x4" = (s2=4);
+label "x5" = (s2=5);
+label "x6" = (s2=6);
+
+
+
+
 
 label "go1" = go_action;
 label "stop1" = stop_action;
 label "go2" = go_action2;
 label "stop2" = stop_action2;
-
-label "p2" = (p=2) ; 
-label "p3" = (p=3) ; 
-label "p4" = (p=4) ; 
-label "p5" = (p=5) ; 
-label "p6" = (p=6) ; 
-label "p7" = (p=7) ; 
-label "p8" = (p=8) ; module car1policy
+module car1policy
 	c1_go1 : bool init false;
 	c1_stop1 : bool init false;
 
 	[go] c1_go1 -> 1:(c1_go1'=false);
 	[stop] c1_stop1 -> 1:(c1_stop1'=false);
-	[assign] !carpol1 &(a=1) & (h=0) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=5) & (h=0) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=3) & (h=0) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=3) & (h=1) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=3) & (h=0) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=1) & (h=0) & (p=3) -> (c1_stop1'=true);
-	[assign] !carpol1 &(a=1) & (h=0) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=1) & (h=5) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=1) & (h=5) & (p=3) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=1) & (h=5) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=7) & (h=1) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=7) & (h=1) & (p=3) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=7) & (h=3) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=7) & (h=3) & (p=3) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=7) & (h=1) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=7) & (h=3) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=5) & (h=7) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=5) & (h=1) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=5) & (h=1) & (p=3) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=5) & (h=3) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=5) & (h=3) & (p=3) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=5) & (h=7) & (p=3) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=5) & (h=7) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=3) & (h=7) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=3) & (h=1) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=5) & (h=1) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=5) & (h=3) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=3) & (h=7) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=1) & (h=3) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=1) & (h=3) & (p=3) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=1) & (h=3) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=7) & (h=0) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=7) & (h=0) & (p=3) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=7) & (h=0) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=3) & (h=5) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=3) & (h=5) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=1) & (h=7) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=1) & (h=7) & (p=3) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=1) & (h=7) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=7) & (h=5) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=7) & (h=5) & (p=3) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=7) & (h=5) & (p=8) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=5) & (h=0) & (p=2) -> (c1_go1'=true);
-	[assign] !carpol1 &(a=5) & (h=0) & (p=3) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=1) & (s2=0) & (p=0) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=2) & (s2=1) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=0) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=0) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=3) & (s2=2) & (p=0) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=3) & (s2=2) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=3) & (s2=2) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=3) & (s2=1) & (p=0) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=3) & (s2=1) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=3) & (s2=1) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=1) & (p=0) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=2) & (s2=1) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=3) & (s2=0) & (p=0) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=3) & (s2=0) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=3) & (s2=0) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=0) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=0) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=2) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=2) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=2) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=0) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=5) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=5) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=3) & (s2=5) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=3) & (s2=5) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=5) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=5) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=5) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=5) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=3) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=2) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=3) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=3) & (p=2) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=4) & (s2=2) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=2) & (p=2) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=4) & (s2=1) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=1) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=1) & (p=2) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=2) & (s2=3) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=3) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=3) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=0) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=0) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=0) & (p=2) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=1) & (s2=3) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=3) & (p=0) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=1) & (s2=3) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=5) & (s2=4) & (p=0) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=5) & (s2=4) & (p=2) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=5) & (s2=3) & (p=0) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=5) & (s2=3) & (p=2) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=5) & (s2=2) & (p=0) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=5) & (s2=2) & (p=2) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=3) & (s2=4) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=3) & (s2=4) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=3) & (s2=4) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=5) & (s2=1) & (p=0) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=5) & (s2=1) & (p=2) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=2) & (s2=4) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=4) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=4) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=5) & (s2=0) & (p=0) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=5) & (s2=0) & (p=2) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=1) & (s2=4) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=4) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=4) & (p=2) -> (c1_stop1'=true);
 endmodule
 module car2policy
 	c2_go2 : bool init false;
@@ -180,48 +158,70 @@ module car2policy
 
 	[go2] c2_go2 -> 1:(c2_go2'=false);
 	[stop2] c2_stop2 -> 1:(c2_stop2'=false);
-	[assign] !carpol2 &(a=1) & (h=0) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=5) & (h=0) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=3) & (h=0) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=3) & (h=1) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=3) & (h=0) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=1) & (h=0) & (p=3) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=1) & (h=0) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=1) & (h=5) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=1) & (h=5) & (p=3) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=1) & (h=5) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=7) & (h=1) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=7) & (h=1) & (p=3) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=7) & (h=3) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=7) & (h=3) & (p=3) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=7) & (h=1) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=7) & (h=3) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=5) & (h=7) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=5) & (h=1) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=5) & (h=1) & (p=3) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=5) & (h=3) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=5) & (h=3) & (p=3) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=5) & (h=7) & (p=3) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=5) & (h=7) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=3) & (h=7) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=3) & (h=1) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=5) & (h=1) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=5) & (h=3) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=3) & (h=7) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=1) & (h=3) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=1) & (h=3) & (p=3) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=1) & (h=3) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=7) & (h=0) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=7) & (h=0) & (p=3) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=7) & (h=0) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=3) & (h=5) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=3) & (h=5) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=1) & (h=7) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=1) & (h=7) & (p=3) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=1) & (h=7) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=7) & (h=5) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=7) & (h=5) & (p=3) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=7) & (h=5) & (p=8) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=5) & (h=0) & (p=2) -> (c2_go2'=true);
-	[assign] !carpol2 &(a=5) & (h=0) & (p=3) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=1) & (s2=0) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=2) & (s2=1) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=2) & (s2=0) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=1) & (s2=0) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=3) & (s2=2) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=3) & (s2=2) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=3) & (s2=2) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=3) & (s2=1) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=3) & (s2=1) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=3) & (s2=1) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=2) & (s2=1) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=2) & (s2=1) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=3) & (s2=0) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=3) & (s2=0) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=3) & (s2=0) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=2) & (s2=0) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=2) & (s2=0) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=1) & (s2=2) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=1) & (s2=2) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=1) & (s2=2) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=1) & (s2=0) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=5) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=5) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=3) & (s2=5) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=3) & (s2=5) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=2) & (s2=5) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=2) & (s2=5) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=1) & (s2=5) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=1) & (s2=5) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=3) & (p=1) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=2) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=3) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=3) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=2) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=2) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=1) & (p=1) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=1) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=1) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=2) & (s2=3) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=2) & (s2=3) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=2) & (s2=3) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=0) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=0) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=0) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=1) & (s2=3) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=1) & (s2=3) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=1) & (s2=3) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=5) & (s2=4) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=5) & (s2=4) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=5) & (s2=3) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=5) & (s2=3) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=5) & (s2=2) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=5) & (s2=2) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=3) & (s2=4) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=3) & (s2=4) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=3) & (s2=4) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=5) & (s2=1) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=5) & (s2=1) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=2) & (s2=4) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=2) & (s2=4) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=2) & (s2=4) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=5) & (s2=0) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=5) & (s2=0) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=1) & (s2=4) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=1) & (s2=4) & (p=1) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=1) & (s2=4) & (p=2) -> (c2_stop2'=true);
 endmodule

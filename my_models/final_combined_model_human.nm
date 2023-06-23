@@ -1,104 +1,75 @@
-
-
 mdp
 
-const int N=10;
 
+// Length of Street
+const int N=6;
+
+// pedestrian move probability
+//const double pL;
+
+//formula crash = ((p=1)&((a=N-1)|(h=N-1)))|(a=h);
 formula action = go_action|stop_action;
-formula action2=go_action2|stop_action2;
-
-const double pl =.9 ;
-
-module autonomous_car
-	a : [1..N] init 1;
+formula action2 = go_action2|stop_action2;
+module car
+	s : [0..N] init 1;
 	go_action : bool init false;
 	stop_action: bool init false;
 	[go] !action -> 1:(go_action'=true);
 	[stop] !action -> 1:(stop_action'=true);
-
-	[move] (a=1)&go_action -> pl: (a'=3)&(go_action'=false) + (1-pl): (a'=1)&(go_action'=false);
-	[move] (a=1)&stop_action -> pl: (a'=1)&(stop_action'=false)+  (1-pl): (a'=3)&(stop_action'=false);
-
-	[move] (a=3)&go_action -> pl: (a'=5)&(go_action'=false) + (1-pl): (a'=3)&(go_action'=false);
-	[move] (a=3)&stop_action -> pl: (a'=3)&(stop_action'=false)+  (1-pl): (a'=5)&(stop_action'=false);
-
-
-	[move] (a=5)&go_action -> pl: (a'=7)&(go_action'=false) + (1-pl): (a'=5)&(go_action'=false);
-	[move] (a=5)&stop_action -> pl: (a'=5)&(stop_action'=false)+  (1-pl): (a'=7)&(stop_action'=false);
-
-	[move] (a=7)&go_action -> pl: (a'=9)&(go_action'=false) + (1-pl): (a'=7)&(go_action'=false);
-	[move] (a=7)&stop_action -> pl: (a'=7)&(stop_action'=false)+  (1-pl): (a'=7)&(stop_action'=false);
-
-	[] (a=9) -> true;
-
+	[move] (s<N)&go_action -> (s'=s+1)&(go_action'=false);
+	[move] (s<N)&stop_action -> (s'=s)&(stop_action'=false);
+	[] (s=N) -> true;
 endmodule
 
-module human_car 
-	h : [0..N] init 0;
+module car2
+	s2 : [0..N] init 0;
 	go_action2 : bool init false;
 	stop_action2: bool init false;
 	[go2] !action2 -> 1:(go_action2'=true);
 	[stop2] !action2 -> 1:(stop_action2'=true);
-
-	[move] (h=0)&go_action2 -> pl: (h'=1)&(go_action2'=false) + (1-pl): (h'=0)&(go_action2'=false);
-	[move] (h=0)&stop_action2 -> pl: (h'=0)&(stop_action2'=false)+  (1-pl): (h'=1)&(stop_action2'=false);
-
-	[move] (h=1)&go_action2 -> pl: (h'=3)&(go_action2'=false) + (1-pl): (h'=1)&(go_action2'=false);
-	[move] (h=1)&stop_action -> pl: (h'=1)&(stop_action2'=false)+  (1-pl): (h'=3)&(stop_action2'=false);
-
-	[move] (h=3)&go_action2 -> pl: (h'=5)&(go_action2'=false) + (1-pl): (h'=3)&(go_action2'=false);
-	[move] (h=3)&stop_action2 -> pl: (h'=3)&(stop_action2'=false)+  (1-pl): (h'=5)&(stop_action2'=false);
-
-
-	[move] (h=5)&go_action2 -> pl: (h'=7)&(go_action2'=false) + (1-pl): (h'=5)&(go_action2'=false);
-	[move] (h=5)&stop_action2 -> pl: (h'=5)&(stop_action2'=false)+  (1-pl): (h'=7)&(stop_action2'=false);
-
-	[move] (h=7)&go_action2 -> pl: (h'=9)&(go_action2'=false) + (1-pl): (h'=7)&(go_action2'=false);
-	[move] (h=7)&stop_action2 -> pl: (h'=7)&(stop_action2'=false)+  (1-pl): (h'=7)&(stop_action2'=false);
-
-	[] (h=9) -> true;
-
-
-
+	[move] (s2<N)&go_action2 -> (s2'=s2+1)&(go_action2'=false);
+	[move] (s2<N)&stop_action2 -> (s2'=s2)&(stop_action2'=false);
+	[] (s2=N) -> true;
 endmodule
 
 
-label "a1" = (a=1);
-label "a3" = (a=3);
-label "a5" = (a=5);
-label "a7" = (a=7);
-label "a9" = (a=9);
 
-label "h0" = (h=0);
-label "h1" = (h=1);
-label "h3" = (h=3);
-label "h5" = (h=5);
-label "h7" = (h=7);
-label "h9" = (h=9);
+label "Goal" = (s=N)|(s2=N);
 
-label "goal" = (a=9);
-label "goal2" = (h=9);
+label "s0" = (s=0);
+label "s1" = (s=1);
+label "s2" = (s=2);
+label "s3" = (s=3);
+label "s4" = (s=4);
+label "s5" = (s=5);
+label "s6" = (s=6);
+
+label "x0" = (s2=0);
+label "x1" = (s2=1);
+label "x2" = (s2=2);
+label "x3" = (s2=3);
+label "x4" = (s2=4);
+label "x5" = (s2=5);
+label "x6" = (s2=6);
+
+
+//label "p0" = (s_p = 0);
+//label "p1" = (s_p = 1);
+//label "p2" = (s_p = 2);
 
 label "go1" = go_action;
 label "stop1" = stop_action;
 label "go2" = go_action2;
 label "stop2" = stop_action2;
 
-
-
-
-
-
-
-
 const int k =3; 
  module environment 
  p : [0..k] init 0;
- [move] (p=0) ->  0.55 : (p'=0) +0.45 : (p'=1) ; 
-[move] (p=1) ->  0.23 : (p'=0) +0.55 : (p'=1) +0.23 : (p'=2) ; 
-[move] (p=2) ->  0.45 : (p'=1) +0.55 : (p'=2) ; 
+ [move] (p=0) ->  1.0 : (p'=1) ; 
+[move] (p=1) ->  0.26 : (p'=0) +0.48 : (p'=1) +0.26 : (p'=2) ; 
+[move] (p=2) ->  0.52 : (p'=1) +0.48 : (p'=2) ; 
 endmodule 
-label "p2" = (p=0) ; 
-label "p3" = (p=1) ; 
-label "p8" = (p=2) ; 
+label "p0" = (p=0) ; 
+label "p1" = (p=1) ; 
+label "p2" = (p=2) ; 
 

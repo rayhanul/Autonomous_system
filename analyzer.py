@@ -41,27 +41,32 @@ class Analyzer:
         # condition to be crush = 3, 5, 7
         road=[3,5,7]
         for label in labels:
-            if 'a' in label:
+            if 's' in label and not 'stop' in label:
                 autonomous_state = label
-            elif 'h' in label:
+            elif 'x' in label:
                 humand_car_state = label
             elif 'p' in label and not 'stop' in label:
                 pedestrian_state = label
         if autonomous_state[1] == humand_car_state[1]:
             return True
         
-        if humand_car_state[1]==pedestrian_state[1] and pedestrian_state in road :
+        # if (humand_car_state[1] == pedestrian_state[1] or humand_car_state[1] == pedestrian_state[1]) and pedestrian_state[1] ==1 :
+        #     return True
+        if (int(humand_car_state[1]) == 5 and int(pedestrian_state[1]) ==1 ) or (int(autonomous_state[1]) == 5 and int(pedestrian_state[1]) ==1 ):
             return True
         
-        if autonomous_state[1] == pedestrian_state[1] and pedestrian_state in road:
-            return True 
+        # if autonomous_state[1] == pedestrian_state[1] and pedestrian_state[1] ==1 :
+        #     return True 
         
         return False 
     
     def get_mcs(self, number_mcs, env_model_type):
 
         if env_model_type=='original':
+            if number_mcs>1:
+                return self.get_set_of_mcs(number_mcs)
             return self.get_mcs_original_paper()
+        
         elif env_model_type=='control' :
             return self.get_mcs_control_paper()
         else :
@@ -99,16 +104,19 @@ class Analyzer:
 
         mcs={}
         p = generate_p()
-        # p=.8
-
+        # mc_transition={
+        #     "p2":{"p3":p, "p2":1-p},
+        #     "p3":{"p2": p/2, "p3": 1-p, "p8":p/2},
+        #     "p8":{"p8":1-p, "p3":p}
+        # }
         mc_transition={
-            "p2":{"p3":p, "p2":1-p},
-            "p3":{"p2": p/2, "p3": 1-p, "p8":p/2},
-            "p8":{"p8":1-p, "p3":p}
+            "p0":{"p1":p, "p0":1-p},
+            "p1":{"p2": p/2, "p1": 1-p, "p0":p/2},
+            "p2":{"p2":1-p, "p1":p}
         }
-
-        mc=MC(init="p2", transitions=mc_transition, states=["p2", "p3", "p8"], labels={"p2":2, "p3":3, "p8":8})
-        mcs.update({0:{'mc':mc, 'prob':1}})
+        # mc=MC(init="p2", transitions=mc_transition, states=["p2", "p3", "p8"], labels={"p2":2, "p3":3, "p8":8})
+        mc=MC(init="p0", transitions=mc_transition, states=["p2", "p1", "p0"], labels={"p2":2, "p1":1, "p0":0})
+        mcs.update({0:{'mc':mc, 'prob':1, 'transition_prob':p}})
 
         return mcs 
     def get_set_of_mcs(self, number_mcs):
@@ -145,16 +153,22 @@ class Analyzer:
             p = generate_p()
 
             mc_transition={
-                "p2":{"p3":p, "p2":1-p},
-                "p3":{"p2": p/2, "p3": 1-p, "p8":p/2},
-                "p8":{"p8":1-p, "p3":p}
+                "p0":{"p1":p, "p1":1-p},
+                "p1":{"p0": p/2, "p1": 1-p, "p2":p/2},
+                "p2":{"p2":1-p, "p1":p}
             }
+
+            # mc_transition={
+            #     "p2":{"p3":p, "p2":1-p},
+            #     "p3":{"p2": p/2, "p3": 1-p, "p8":p/2},
+            #     "p8":{"p8":1-p, "p3":p}
+            # }
 
             # mc_1=MC(init="p2", transitions=mc_1_transition, states=["p2", "p4", "p6"], labels={"p2":2, "p4":4, "p6":6})
             # mc_2=MC(init="p2", transitions=mc_transition, states=["p2", "p3", "p4", "p5", "p6", "p7", "p8"], labels={"p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7, "p8":8})
             
-            mc=MC(init="p2", transitions=mc_transition, states=["p2", "p3", "p8"], labels={"p2":2, "p3":3, "p8":8})
-            mcs.update({index:{'mc':mc, 'prob':1/(2*number_mcs)}})
+            mc=MC(init="p0", transitions=mc_transition, states=["p2", "p1", "p0"], labels={"p2":2, "p1":1, "p0":0})
+            mcs.update({index:{'mc':mc, 'prob':1/(number_mcs), 'transition_prob':p}})
 
             # mcs={0:{'mc':mc_1, 'prob': 0.5}, 1:{'mc':mc_2, 'prob': 0.5}}
 
@@ -181,7 +195,7 @@ class Analyzer:
                 x_num = int(x[1:])
                 p_num = int(p[1:])
 
-                state_in = "(a={}) & (h={}) & (p={}) -> ".format(s_num, x_num, p_num)
+                state_in = "(s={}) & (s2={}) & (p={}) -> ".format(s_num, x_num, p_num)
                 pol_ind = 0 if Agent1_pol[(s_z, x, p)] == int(0) else 1
                 dtmc_file.write(pol1_lead + state_in + out1_ind[pol_ind])
 
@@ -196,7 +210,7 @@ class Analyzer:
                 x_num = int(x[1:])
                 p_num = int(p[1:])
 
-                state_in = "(a={}) & (h={}) & (p={}) -> ".format(s_num, x_num, p_num)
+                state_in = "(s={}) & (s2={}) & (p={}) -> ".format(s_num, x_num, p_num)
                 pol_ind = 0 if Agent2_pol[(s_z, x, p)] == int(0) else 1
                 dtmc_file.write(pol2_lead + state_in + out2_ind[pol_ind])
 

@@ -1,3 +1,5 @@
+
+
 mdp
 
 
@@ -5,11 +7,13 @@ mdp
 const int N=6;
 
 // pedestrian move probability
-//const double pL;
-
-//formula crash = ((p=1)&((a=N-1)|(h=N-1)))|(a=h);
+const double pL;
+//formula p_off = (s_p=0)|(s_p=2);
+//formula p_on = (s_p=1);
+formula crash = ((s_p=1)&((s=N-1)|(s2=N-1)))|(s=s2);
 formula action = go_action|stop_action;
-formula action2 = go_action2|stop_action2;
+formula action2=go_action2|stop_action2;
+
 module car
 	s : [0..N] init 1;
 	go_action : bool init false;
@@ -32,8 +36,26 @@ module car2
 	[] (s2=N) -> true;
 endmodule
 
+//module car2 = car [s2]
 
+//module car2
+//	s2 : [0..N] init 1;
+//	[go2] (s2<N) -> (s2'=s2+1);
+//	[stop2] (s2<N) -> (s2'=s2);
+//	[] (s2=N) -> true;
+//endmodule
 
+module pedestrian
+	s_p : [0..2] init 0;
+	[move] (s_p=0) -> pL:(s_p'=1) + 1-pL:(s_p'=0);
+	//[stop] (s_p=0) -> pL:(s_p'=1) + 1-pL:(s_p'=0);
+	[move] (s_p=1) -> pL/2:(s_p'=2)+pL/2:(s_p'=0) + 1-pL:(s_p'=1);
+	//[stop] (s_p=1) -> pL/2:(s_p'=2)+pL/2:(s_p'=0) + 1-pL:(s_p'=1);
+	[move] (s_p=2) -> pL:(s_p'=1) + 1-pL:(s_p'=2); 
+	//[stop] (s_p=2) -> pL:(s_p'=1) + 1-pL:(s_p'=2); 
+endmodule
+
+//label "Crash" = (crash=true);
 label "Goal" = (s=N)|(s2=N);
 
 label "s0" = (s=0);
@@ -53,24 +75,11 @@ label "x5" = (s2=5);
 label "x6" = (s2=6);
 
 
-//label "p0" = (s_p = 0);
-//label "p1" = (s_p = 1);
-//label "p2" = (s_p = 2);
+label "p0" = (s_p = 0);
+label "p1" = (s_p = 1);
+label "p2" = (s_p = 2);
 
 label "go1" = go_action;
 label "stop1" = stop_action;
 label "go2" = go_action2;
 label "stop2" = stop_action2;
-
-const int k =4; 
- module environment 
- p : [0..k] init 0;
- [move] (p=0) ->  1.0 : (p'=2) ; 
-[move] (p=2) ->  0.24 : (p'=1) +0.52 : (p'=2) +0.24 : (p'=3) ; 
-[move] (p=1) ->  1.0 : (p'=2) ; 
-[move] (p=3) ->  0.47 : (p'=2) +0.53 : (p'=3) ; 
-endmodule 
-label "p0" = (p=0)|(p=1) ; 
-label "p1" = (p=2) ; 
-label "p2" = (p=3) ; 
-

@@ -41,7 +41,7 @@ label "a7" = (a=7);
 label "a9" = (a=9);
 
 
-label "goal" = (a=9) ;
+label "goal" = (a=9) | (h=9);
 
 label "go1" = go_action;
 label "stop1" = stop_action;

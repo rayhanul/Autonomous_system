@@ -1,0 +1,77 @@
+dtmc
+
+
+
+// Length of Street
+const int N=6;
+
+// pedestrian move probability
+//const double pL;
+
+//formula crash = ((p=1)&((a=N-1)|(h=N-1)))|(a=h);
+formula action = go_action|stop_action;
+formula action2=go_action2|stop_action2;
+formula carpol1 = c1_go1|c1_stop1;
+formula carpol2 = c2_go2|c2_stop2;
+
+
+module car
+	a : [0..N] init 1;
+	go_action : bool init false;
+	stop_action: bool init false;
+    assign_flag : bool init true;
+
+	[assign] assign_flag -> (assign_flag'=false);
+
+	[go] !action& !assign_flag -> 1:(go_action'=true);
+	[stop] !action & !assign_flag -> 1:(stop_action'=true);
+
+
+	[move] (a<N)&go_action -> (a'=a+1)&(go_action'=false) & (assign_flag'=true);
+	[move] (a<N)&stop_action -> (a'=a)&(stop_action'=false) & (assign_flag'=true);
+	[] (a=N) -> true;
+endmodule
+
+module car2
+	h : [0..N] init 0;
+	go_action2 : bool init false;
+	stop_action2: bool init false;
+	assign_flag2 : bool init true;
+
+	[go2] !action2 &  !assign_flag2  -> 1:(go_action2'=true);
+	[stop2] !action2  & !assign_flag2-> 1:(stop_action2'=true);
+
+
+	[move] (h<N)&go_action2 -> (h'=h+1)&(go_action2'=false) & (assign_flag2'=true);
+	[move] (h<N)&stop_action2 -> (h'=h)&(stop_action2'=false) & (assign_flag2'=true);
+	[] (h=N) -> true;
+endmodule
+
+%env_model%
+
+label "goal" = (a=6)|(h=6);
+
+label "a0" = (a=0);
+label "a1" = (a=1);
+label "a2" = (a=2);
+label "a3" = (a=3);
+label "a4" = (a=4);
+label "a5" = (a=5);
+label "a6" = (a=6);
+
+label "h0" = (h=0);
+label "h1" = (h=1);
+label "h2" = (h=2);
+label "h3" = (h=3);
+label "h4" = (h=4);
+label "h5" = (h=5);
+label "h6" = (h=6);
+
+
+
+
+
+label "go1" = go_action;
+label "stop1" = stop_action;
+label "go2" = go_action2;
+label "stop2" = stop_action2;
