@@ -16,10 +16,13 @@ import time
 from analyzer import * 
 from Agent import * 
 
+
+from collections import defaultdict 
+
 if __name__=="__main__":
 
-    numiter = 10
-    number_mcs = 3
+    numiter = 15
+    number_mcs = 5
 
     '''
     dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
@@ -35,6 +38,7 @@ if __name__=="__main__":
 
     counterarray = [0 for _ in range(numiter)]
     data_out = dict()
+    
 
     dtmc_template_file = "template_dtmc_original.txt"
     template_model = 'template_model_original.txt'
@@ -50,6 +54,8 @@ if __name__=="__main__":
     # instantiator = stormpy.pars.PMdpInstantiator(model)
 
     for iter in range(0, numiter):
+
+        mc_data=dict()
 
         # model for Autonomous agent...
         analyzer = Analyzer()
@@ -205,30 +211,61 @@ if __name__=="__main__":
         for idx in range(0,len(autonomous_mcs)):
             s=autonomous_mcs[idx]['transition_prob']
             s2=human_mcs[idx]['transition_prob']
-            data_out.update(
+            mc_data.update(
                 {(s, s2): original_model_prob})
             
             print(f"iteration: {iter}, Autonomous: {s}, human: {s2}, True system, Pr: {original_model_prob}")
 
-            
+        data_out.update({iter: mc_data})
 
-    fig = plt.figure()
-    ax = plt.axes(projection='3d')
-    xline = []
-    yline = []
-    zline = []
-    for x, y in data_out:
-        xline.append(x)
-        yline.append(y)
-        zline.append(data_out[(x, y)])
+    n_rows_figures=3
+    n_column_figures=5
 
-    a_li = np.asarray([xline, yline, zline])
-    # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
-    ax.scatter3D(xline, yline, zline, c=zline)
-    ax.set_xlabel(r'$p_A$')
-    ax.set_ylabel(r'$p_H$')
-    ax.set_zlabel(r'$p_T$')
-    plt.show()
+    figure=plt.figure()
+    index=0
+    for row_index in range(1, n_rows_figures):
+        for col_index in range(1, n_column_figures):
+            ax=figure.add_subplot(row_index, n_column_figures, col_index, projection='3d')
+            random_data_index=random.randint(0, numiter-1)
+            random_data=data_out[index]
+            index=index+1
+
+            xline = []
+            yline = []
+            zline = []
+            for idx, val in random_data.items():
+
+                xline.append(idx[0])
+                yline.append(idx[1])
+                zline.append(val)
+            a_li = np.asarray([xline, yline, zline])
+            ax.scatter3D(xline, yline, zline, c=zline)
+            ax.set_xlabel(r'$A$')
+            ax.set_ylabel(r'$H$')
+            ax.set_zlabel(r'$p_T$')
+    figure.subplots_adjust(top = 0.90, bottom=0.01, hspace=.5, wspace=0.4)
+    figure.show()
+
+
+
+
+    # fig = plt.figure()
+    # ax = plt.axes(projection='3d')
+    # xline = []
+    # yline = []
+    # zline = []
+    # for x, y in mc_data:
+    #     xline.append(x)
+    #     yline.append(y)
+    #     zline.append(mc_data[(x, y)])
+
+    # a_li = np.asarray([xline, yline, zline])
+    # # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
+    # ax.scatter3D(xline, yline, zline, c=zline)
+    # ax.set_xlabel(r'$p_A$')
+    # ax.set_ylabel(r'$p_H$')
+    # ax.set_zlabel(r'$p_T$')
+    # plt.show()
 
     print('show')
 
