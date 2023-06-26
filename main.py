@@ -22,7 +22,7 @@ from collections import defaultdict
 if __name__=="__main__":
 
     numiter = 15
-    number_mcs = 5
+    number_mcs = 4
 
     '''
     dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
@@ -220,53 +220,51 @@ if __name__=="__main__":
 
     n_rows_figures=3
     n_column_figures=5
+    if number_mcs>1:
+        figure=plt.figure()
+        index=0
+        for row_index in range(1, n_rows_figures):
+            for col_index in range(1, n_column_figures):
+                ax=figure.add_subplot(row_index, n_column_figures, col_index, projection='3d')
+                random_data_index=random.randint(0, numiter-1)
+                random_data=data_out[index]
+                index=index+1
 
-    figure=plt.figure()
-    index=0
-    for row_index in range(1, n_rows_figures):
-        for col_index in range(1, n_column_figures):
-            ax=figure.add_subplot(row_index, n_column_figures, col_index, projection='3d')
-            random_data_index=random.randint(0, numiter-1)
-            random_data=data_out[index]
-            index=index+1
+                xline = []
+                yline = []
+                zline = []
+                for idx, val in random_data.items():
 
-            xline = []
-            yline = []
-            zline = []
-            for idx, val in random_data.items():
+                    xline.append(idx[0])
+                    yline.append(idx[1])
+                    zline.append(val)
+                a_li = np.asarray([xline, yline, zline])
+                ax.scatter3D(xline, yline, zline, c=zline)
+                ax.set_xlabel(r'$A$')
+                ax.set_ylabel(r'$H$')
+                ax.set_zlabel(r'$p_T$')
+        figure.subplots_adjust(top = 0.90, bottom=0.01, hspace=.5, wspace=0.4)
+        plt.ioff()
+        plt.show()
+    else :
+        fig = plt.figure()
+        ax = plt.axes(projection='3d')
+        xline = []
+        yline = []
+        zline = []
+        for index, data in data_out.items():
+            for x,y in data:
+                xline.append(x)
+                yline.append(y)
+                zline.append(data[(x, y)])
 
-                xline.append(idx[0])
-                yline.append(idx[1])
-                zline.append(val)
-            a_li = np.asarray([xline, yline, zline])
-            ax.scatter3D(xline, yline, zline, c=zline)
-            ax.set_xlabel(r'$A$')
-            ax.set_ylabel(r'$H$')
-            ax.set_zlabel(r'$p_T$')
-    figure.subplots_adjust(top = 0.90, bottom=0.01, hspace=.5, wspace=0.4)
-    figure.show()
-
-
-
-
-    # fig = plt.figure()
-    # ax = plt.axes(projection='3d')
-    # xline = []
-    # yline = []
-    # zline = []
-    # for x, y in mc_data:
-    #     xline.append(x)
-    #     yline.append(y)
-    #     zline.append(mc_data[(x, y)])
-
-    # a_li = np.asarray([xline, yline, zline])
-    # # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
-    # ax.scatter3D(xline, yline, zline, c=zline)
-    # ax.set_xlabel(r'$p_A$')
-    # ax.set_ylabel(r'$p_H$')
-    # ax.set_zlabel(r'$p_T$')
-    # plt.show()
-
-    print('show')
+        a_li = np.asarray([xline, yline, zline])
+        # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
+        ax.scatter3D(xline, yline, zline, c=zline)
+        ax.set_xlabel(r'$A$')
+        ax.set_ylabel(r'$H$')
+        ax.set_zlabel(r'$p_T$')
+        plt.ioff()
+        plt.show()
 
 
