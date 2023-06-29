@@ -39,4 +39,15 @@ def generate_pq():
 
 def generate_p():
         p=random.uniform(1e-5, 1-1e-5)
+        # p=random.uniform(.7, .77)
+
+        return p 
+
+def generate_p_within_limit(low, high):
+        if low<0: 
+                low=0
+        if high>1:
+                high=1
+        
+        p=random.uniform(low, high)
         return p 

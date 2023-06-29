@@ -9,7 +9,7 @@ class Agent:
 
     def __init__(self, number_mcs, analyzer, belief_manager, template_model, belief_type, env_model_type, env_model_name, combined_model_name='final_combined_model.nm' ):
         
-        self.mcs=analyzer.get_mcs(number_mcs, env_model_type)
+        self.mcs=analyzer.get_mcs(number_mcs, env_model_type, env_model_name)
 
         self.analyzer=analyzer
         self.belief_manager=belief_manager
@@ -30,18 +30,18 @@ class Agent:
     def get_agent_model(self):
 
         if self.env_model_type=='original':
-            if self.belief_type=='default':
-                self.belief_manager=''
-                self.transition=self.mcs[0]['mc'].transitions
-                environment_prism_model=self.prism_model_generator.get_prism_model_original()
-            else:
-                belief=Belief(self.mcs)
-                b3= belief.get_complete_environment_model()
-                self.belief_manager=belief 
-                self.transition=b3 
-                old_states, b3_mc=belief.get_complete_MC(b3, belief.initial_belief_state )
-                prism_model_generator=Prism_Model_Generator(b3_mc, old_states, self.number_states)
-                environment_prism_model=prism_model_generator.get_prism_model()
+            # if self.belief_type=='default':
+            #     self.belief_manager=''
+            #     self.transition=self.mcs[0]['mc'].transitions
+            #     environment_prism_model=self.prism_model_generator.get_prism_model_original()
+            # else:
+            belief=Belief(self.mcs)
+            b3= belief.get_complete_environment_model()
+            self.belief_manager=belief 
+            self.transition=b3 
+            old_states, b3_mc=belief.get_complete_MC(b3, belief.initial_belief_state )
+            prism_model_generator=Prism_Model_Generator(b3_mc, old_states, self.number_states)
+            environment_prism_model=prism_model_generator.get_prism_model()
 
         else :
 
@@ -171,17 +171,17 @@ class Agent:
         # model=model + 'endmodule' 
         return "" 
             
-    def get_policies(self, analyzer, model, result, actions1, actions2):
+    def get_policies(self, analyzer, model, result, actions1):
         '''
         return the policies of an agent 
         '''
-        agent_1={}
+        agent_1=dict()
         Agent1_pol = dict()
         move_ids = [m_s.id for m_s in model.states for s_i in m_s.labels if 'go' in s_i or 'stop' in s_i]
 
         action_points = set(range(model.nr_states)) - set(move_ids)
         actions1 = actions1
-        actions2=actions2
+        # actions2=actions2
 
         for s_i in action_points:
             # print(model.states[s_i].labels)
@@ -193,11 +193,11 @@ class Agent:
                     x_state = l_i
                 elif 'p' in l_i:
                     p_state = l_i
-            deterministic_choice=result.scheduler.get_choice(s_i).get_deterministic_choice()
-            transition_at_s_i = model.states[s_i].actions[deterministic_choice].transitions
-            xc=int(re.findall('\\d+',str(transition_at_s_i))[0])
-            hold_state = model.states[int(re.findall('\\d+',str(transition_at_s_i))[0])]
-
+            # deterministic_choice=result.scheduler.get_choice(s_i).get_deterministic_choice()
+            # transition_at_s_i = model.states[s_i].actions[deterministic_choice].transitions
+            # xc=int(re.findall('\\d+',str(transition_at_s_i))[0])
+            # hold_state = model.states[int(re.findall('\\d+',str(transition_at_s_i))[0])]
+            hold_state = model.states[int(re.findall('\\d+', str(model.states[s_i].actions[result.scheduler.get_choice(s_i).get_deterministic_choice()].transitions))[0])]
             next_action = result.scheduler.get_choice(hold_state).get_deterministic_choice()
             next_state = model.states[int(re.findall('\\d+', str(hold_state.actions[int(next_action)].transitions))[0])]
             # if 'crash' not in next_state.labels and 'goal' not in next_state.labels:
@@ -212,6 +212,7 @@ class Agent:
                     # act_tup += (act_tuple2[0],)
                     Agent1_pol.update({(s_state, x_state, p_state): act_tup[0] })
                     agent_1.update({(s_state[1], x_state[1], p_state[1]): act_tup[0]})
+                   
         # return Agent1_pol, agent_1
 
         # for s_i in action_points:
@@ -235,5 +236,5 @@ class Agent:
         #         agent_1.update({(s_state[1], x_state[1], p_state[1]): act_tup[0]})
 
 
-        return Agent1_pol, agent_1 
+        return Agent1_pol , agent_1
 

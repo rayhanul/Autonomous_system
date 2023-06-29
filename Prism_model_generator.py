@@ -55,7 +55,7 @@ class Prism_Model_Generator:
         # self.prism_program +='dtmc\n'
         self.prism_program+='\n'
         init =self.mc.init.replace('x','')
-        self.prism_program += f'const int k ={len(self.mc.states)}; \n module environment \n p : [0..k] init {init};\n'
+        self.prism_program += f'const int k ={len(self.mc.states)-1}; \n module environment \n p : [0..k] init {init};\n'
         moves=' '
         for idx, transition in self.mc.transitions.items():
             next_trans=''

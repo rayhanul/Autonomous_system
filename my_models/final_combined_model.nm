@@ -62,15 +62,14 @@ label "stop1" = stop_action;
 label "go2" = go_action2;
 label "stop2" = stop_action2;
 
-const int k =4; 
+const int k =2; 
  module environment 
  p : [0..k] init 0;
- [move] (p=0) ->  1.0 : (p'=2) ; 
-[move] (p=2) ->  0.24 : (p'=1) +0.52 : (p'=2) +0.24 : (p'=3) ; 
-[move] (p=1) ->  1.0 : (p'=2) ; 
-[move] (p=3) ->  0.47 : (p'=2) +0.53 : (p'=3) ; 
+ [move] (p=0) ->  0.17 : (p'=0) +0.83 : (p'=1) ; 
+[move] (p=1) ->  0.42 : (p'=0) +0.17 : (p'=1) +0.42 : (p'=2) ; 
+[move] (p=2) ->  0.83 : (p'=1) +0.17 : (p'=2) ; 
 endmodule 
-label "p0" = (p=0)|(p=1) ; 
-label "p1" = (p=2) ; 
-label "p2" = (p=3) ; 
+label "p0" = (p=0) ; 
+label "p1" = (p=1) ; 
+label "p2" = (p=2) ; 
 

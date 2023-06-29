@@ -47,7 +47,8 @@ class Analyzer:
                 humand_car_state = label
             elif 'p' in label and not 'stop' in label:
                 pedestrian_state = label
-        if autonomous_state[1] == humand_car_state[1]:
+
+        if int(autonomous_state[1]) == (humand_car_state[1]):
             return True
         
         # if (humand_car_state[1] == pedestrian_state[1] or humand_car_state[1] == pedestrian_state[1]) and pedestrian_state[1] ==1 :
@@ -60,12 +61,12 @@ class Analyzer:
         
         return False 
     
-    def get_mcs(self, number_mcs, env_model_type):
+    def get_mcs(self, number_mcs, env_model_type, env_type):
 
         if env_model_type=='original':
-            if number_mcs>1:
-                return self.get_set_of_mcs(number_mcs)
-            return self.get_mcs_original_paper()
+            # if number_mcs>1:
+            return self.get_set_of_mcs(number_mcs, env_model=env_type)
+            # return self.get_mcs_original_paper()
         
         elif env_model_type=='control' :
             return self.get_mcs_control_paper()
@@ -119,11 +120,23 @@ class Analyzer:
         mcs.update({0:{'mc':mc, 'prob':1, 'transition_prob':p}})
 
         return mcs 
-    def get_set_of_mcs(self, number_mcs):
+    def get_set_of_mcs(self, number_mcs, env_model):
 
         '''
         return set of mc models to represent the behavior of pedestrian
         '''
+        # if env_model=='env_model.nm':
+        #     p=.71
+        # else:
+        #     p=.42
+
+        random_ps=[]
+        p=generate_p_within_limit(1e-5, 1-1e-5)
+        random_ps.append(p)
+        delta=0.05
+        for index in range(number_mcs-1):
+            p2=generate_p_within_limit(p-delta, p+delta)
+            random_ps.append(p2)
 
         mcs={}
         for index in range(number_mcs):
@@ -150,10 +163,10 @@ class Analyzer:
             # mc=MC(init="p2", transitions=mc_1_transition, states=["p2", "p3", "p4", "p5", "p6", "p7", "p8"], labels={"p2":2, "p3":3, "p4":4, "p5":5, "p6":6, "p7":7, "p8":8})
             # mcs.update({index:{'mc':mc, 'prob':1/(2*number_mcs)}})
 
-            p = generate_p()
-
+            # p = generate_p()
+            p=random_ps[index]
             mc_transition={
-                "p0":{"p1":p, "p1":1-p},
+                "p0":{"p1":p, "p0":1-p},
                 "p1":{"p0": p/2, "p1": 1-p, "p2":p/2},
                 "p2":{"p2":1-p, "p1":p}
             }

@@ -21,14 +21,15 @@ from collections import defaultdict
 
 if __name__=="__main__":
 
-    numiter = 15
+    numiter = 150
     number_mcs = 4
 
     '''
     dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
     control paper 
     '''
-    belief_type = 'dynamic'
+    # default for no belief , dynamic for original 
+    belief_type = 'default'
     '''
     original - original paper 
     homo - 
@@ -47,6 +48,8 @@ if __name__=="__main__":
     # path = os.path.join('/home/rayhanul/Documents/GitHub/Autonomous_system/my_models', original_mdp)
     # prism_program = stormpy.parse_prism_program(path)
     formula = 'Pmax=?[!(("x5" & "p1")| ("s5" & "p1") |("s0" & "x0") | ("s1" & "x1") | ("s2" & "x2") | ("s3" & "x3") |("s4" & "x4") | ("s5" & "x5")) U "Goal"]'
+    # formula_auto = 'Pmax=?[!( ("s5" & "p1") |("s0" & "x0") | ("s1" & "x1") | ("s2" & "x2") | ("s3" & "x3") |("s4" & "x4") | ("s5" & "x5")) U "Goal"]'
+    # formula_human = 'Pmax=?[!( ("x5" & "p1") |("s0" & "x0") | ("s1" & "x1") | ("s2" & "x2") | ("s3" & "x3") |("s4" & "x4") | ("s5" & "x5")) U "Goal"]'
     # formula_str='Pmax=?[(!( ("s3" & "p3")  | ("s3" & "x3") | ("s5" & "x5") | ("s7" & "x7"))) U "Goal"]'
     # formula_str = "R=? [ F ((s=5) | (s=0&srep=3)) ]"
 
@@ -143,14 +146,14 @@ if __name__=="__main__":
 
 
 
-        Agent1_pol , agen_1= autonomous_agent.get_policies(
-            analyzer, autonomous_model, result, ['go1', 'stop1'], ['go2', 'stop2'])
+        Agent1_pol, agen_1 = autonomous_agent.get_policies(
+            analyzer, autonomous_model, result, ['go1', 'stop1'])
 
 
 
 
         Agent2_pol, agen_2 = human_agent.get_policies(
-            analyzer2, model_human, result_human, ['go1', 'stop1'], ['go2', 'stop2'])
+            analyzer2, model_human, result_human, ['go2', 'stop2'])
         
         # with open('pol.txt', 'w') as convert_file:
         #     for idx, val in agen_1.items():
@@ -218,53 +221,78 @@ if __name__=="__main__":
 
         data_out.update({iter: mc_data})
 
-    n_rows_figures=3
-    n_column_figures=5
-    if number_mcs>1:
-        figure=plt.figure()
-        index=0
-        for row_index in range(1, n_rows_figures):
-            for col_index in range(1, n_column_figures):
-                ax=figure.add_subplot(row_index, n_column_figures, col_index, projection='3d')
-                random_data_index=random.randint(0, numiter-1)
-                random_data=data_out[index]
-                index=index+1
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    xline = []
+    yline = []
+    zline = []
+    for index, data in data_out.items():
+        for x,y in data:
+            xline.append(x)
+            yline.append(y)
+            zline.append(data[(x, y)])
 
-                xline = []
-                yline = []
-                zline = []
-                for idx, val in random_data.items():
+    a_li = np.asarray([xline, yline, zline])
+    # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
+    ax.scatter3D(xline, yline, zline, c=zline)
+    ax.set_xlabel(r'$A$')
+    ax.set_ylabel(r'$H$')
+    ax.set_zlabel(r'$p_T$')
+    plt.xlim(0,1)
+    plt.ylim(0,1)
+    plt.ioff()
+    plt.show()
 
-                    xline.append(idx[0])
-                    yline.append(idx[1])
-                    zline.append(val)
-                a_li = np.asarray([xline, yline, zline])
-                ax.scatter3D(xline, yline, zline, c=zline)
-                ax.set_xlabel(r'$A$')
-                ax.set_ylabel(r'$H$')
-                ax.set_zlabel(r'$p_T$')
-        figure.subplots_adjust(top = 0.90, bottom=0.01, hspace=.5, wspace=0.4)
-        plt.ioff()
-        plt.show()
-    else :
-        fig = plt.figure()
-        ax = plt.axes(projection='3d')
-        xline = []
-        yline = []
-        zline = []
-        for index, data in data_out.items():
-            for x,y in data:
-                xline.append(x)
-                yline.append(y)
-                zline.append(data[(x, y)])
 
-        a_li = np.asarray([xline, yline, zline])
-        # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
-        ax.scatter3D(xline, yline, zline, c=zline)
-        ax.set_xlabel(r'$A$')
-        ax.set_ylabel(r'$H$')
-        ax.set_zlabel(r'$p_T$')
-        plt.ioff()
-        plt.show()
+
+
+    # n_rows_figures=3
+    # n_column_figures=5
+    # if number_mcs>1:
+    #     figure=plt.figure()
+    #     index=0
+    #     for row_index in range(1, n_rows_figures):
+    #         for col_index in range(1, n_column_figures):
+    #             ax=figure.add_subplot(row_index, n_column_figures, col_index, projection='3d')
+    #             random_data_index=random.randint(0, numiter-1)
+    #             random_data=data_out[index]
+    #             index=index+1
+
+    #             xline = []
+    #             yline = []
+    #             zline = []
+    #             for idx, val in random_data.items():
+
+    #                 xline.append(idx[0])
+    #                 yline.append(idx[1])
+    #                 zline.append(val)
+    #             a_li = np.asarray([xline, yline, zline])
+    #             ax.scatter3D(xline, yline, zline, c=zline)
+    #             ax.set_xlabel(r'$A$')
+    #             ax.set_ylabel(r'$H$')
+    #             ax.set_zlabel(r'$p_T$')
+    #     figure.subplots_adjust(top = 0.90, bottom=0.01, hspace=.5, wspace=0.4)
+    #     plt.ioff()
+    #     plt.show()
+    # else :
+    #     fig = plt.figure()
+    #     ax = plt.axes(projection='3d')
+    #     xline = []
+    #     yline = []
+    #     zline = []
+    #     for index, data in data_out.items():
+    #         for x,y in data:
+    #             xline.append(x)
+    #             yline.append(y)
+    #             zline.append(data[(x, y)])
+
+    #     a_li = np.asarray([xline, yline, zline])
+    #     # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
+    #     ax.scatter3D(xline, yline, zline, c=zline)
+    #     ax.set_xlabel(r'$A$')
+    #     ax.set_ylabel(r'$H$')
+    #     ax.set_zlabel(r'$p_T$')
+    #     plt.ioff()
+    #     plt.show()
 
 

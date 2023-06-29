@@ -1,10 +1,10 @@
 
-const int k =3; 
+const int k =2; 
  module environment 
  p : [0..k] init 0;
- [move] (p=0) ->  1.0 : (p'=1) ; 
-[move] (p=1) ->  0.26 : (p'=0) +0.48 : (p'=1) +0.26 : (p'=2) ; 
-[move] (p=2) ->  0.52 : (p'=1) +0.48 : (p'=2) ; 
+ [move] (p=0) ->  0.57 : (p'=0) +0.43 : (p'=1) ; 
+[move] (p=1) ->  0.22 : (p'=0) +0.56 : (p'=1) +0.22 : (p'=2) ; 
+[move] (p=2) ->  0.43 : (p'=1) +0.57 : (p'=2) ; 
 endmodule 
 label "p0" = (p=0) ; 
 label "p1" = (p=1) ; 
