@@ -133,7 +133,7 @@ class Analyzer:
         random_ps=[]
         p=generate_p_within_limit(1e-5, 1-1e-5)
         random_ps.append(p)
-        delta=0.05
+        delta=0.15
         for index in range(number_mcs-1):
             p2=generate_p_within_limit(p-delta, p+delta)
             random_ps.append(p2)

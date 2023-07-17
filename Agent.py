@@ -4,6 +4,7 @@ import re
 from Prism_model_generator import * 
 from finite_mc import * 
 
+import time 
 
 class Agent:
 
@@ -16,12 +17,14 @@ class Agent:
         self.template_model=template_model
         self.combined_model_name=combined_model_name
         self.env_model_name=env_model_name
+        self.number_mcs=number_mcs
         self.formula=''
         self.transition=''
         self.belief_type=belief_type
         self.env_model_type=env_model_type
         self.labels={}
         self.number_states=2
+        self.number_belief_states=0
         if self.env_model_type=='original':
             self.prism_model_generator=Prism_Model_Generator(self.mcs, self.mcs[0]['mc'].labels, self.number_states)
 
@@ -36,7 +39,9 @@ class Agent:
             #     environment_prism_model=self.prism_model_generator.get_prism_model_original()
             # else:
             belief=Belief(self.mcs)
+            start=time.time()
             b3= belief.get_complete_environment_model()
+            # print(f'complete env time agent : {time.time()-start}')
             self.belief_manager=belief 
             self.transition=b3 
             old_states, b3_mc=belief.get_complete_MC(b3, belief.initial_belief_state )
@@ -65,6 +70,7 @@ class Agent:
             environment_prism_model=prism_model_generator.get_prism_model()
 
             # analyzer=Analyzer()
+        self.number_belief_states=len(old_states)
         self.analyzer.writeToFile(environment_prism_model, self.env_model_name )
         self.analyzer.create_combined_model(environment_prism_model, self.template_model, self.combined_model_name)
 

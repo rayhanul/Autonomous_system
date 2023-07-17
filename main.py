@@ -16,14 +16,19 @@ import time
 from analyzer import * 
 from Agent import * 
 
+import time 
 
 from collections import defaultdict 
 
 if __name__=="__main__":
 
-    numiter = 150
-    number_mcs = 4
+    numiter = 500
+    number_mcs = 1
+    complete_mc_time=[]
+    complete_mc_states=[]
 
+    total_verification_time=[]
+    total_states_system=[]
     '''
     dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
     control paper 
@@ -62,11 +67,12 @@ if __name__=="__main__":
 
         # model for Autonomous agent...
         analyzer = Analyzer()
-
+        start_time=time.time()
         autonomous_agent = Agent(number_mcs=number_mcs, analyzer=analyzer, belief_manager="", template_model=template_model, belief_type=belief_type,
                                  env_model_type=env_model_type, env_model_name="env_model.nm", combined_model_name='final_combined_model.nm')
         autonomous_mcs=autonomous_agent.get_agent_model()
 
+        
         # formula = autonomous_agent.getFormula(
         #     agent_type='autonomous', env_model_type=env_model_type)
         # formula='Pmax=?[! "crash" U "goal"]'
@@ -75,7 +81,12 @@ if __name__=="__main__":
         properties = stormpy.parse_properties(
             formula, prism_program)
         autonomous_model = stormpy.build_sparse_model(prism_program)
+        total_states_system.append(autonomous_model.nr_states)
 
+        end_time=time.time()
+        diff=end_time-start_time
+        complete_mc_time.append(diff)
+        complete_mc_states.append(autonomous_agent.number_belief_states)
 
         # test 
         # parameters = model.collect_probability_parameters()
@@ -217,9 +228,17 @@ if __name__=="__main__":
             mc_data.update(
                 {(s, s2): original_model_prob})
             
-            print(f"iteration: {iter}, Autonomous: {s}, human: {s2}, True system, Pr: {original_model_prob}")
+            # print(f"iteration: {iter}, Autonomous: {s}, human: {s2}, True system, Pr: {original_model_prob}")
 
         data_out.update({iter: mc_data})
+        total_execution_time=time.time()-start_time
+        total_verification_time.append(total_execution_time)
+        # print(f'total time : {total_execution_time}')
+
+    avg_env_creation_time=sum(complete_mc_time)/numiter
+    print(f'Complete Environment construction time for {number_mcs}: {avg_env_creation_time}, average number of belief states: {sum(complete_mc_states)/numiter}\n')
+
+    print(f'Average verification time: {sum(total_verification_time)/numiter}, average number of states: {sum(total_states_system)/numiter}\n')
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')
