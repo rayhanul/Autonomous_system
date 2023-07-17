@@ -6,6 +6,7 @@ from collections import deque
 import numpy as np 
 import math 
 
+
 class BeliefTransition:
     def __init__(self, mcs, selected_mc=1, limit=9, discretized_road=["p3","p5", "p7", "p8"], mcs_states=None, init_belief='b6'):
         """
@@ -324,7 +325,7 @@ class Belief:
             values2=list(belief_distribution.values())
             difference= [abs(val-val2) for val, val2 in zip(values, values2) if abs(val-val2) <=threshold]
             belief_name=idx 
-            if len(difference) > 0:
+            if len(difference) == len(values):
                 return True, idx, self.all_beliefs[idx]
         return False, [], [] 
         
@@ -428,7 +429,6 @@ class Belief:
         return new_states
     
     def get_complete_MC(self, transition, init):
-
         states=self.get_all_states(transition)
         labels=self.assign_labels(states)
 
@@ -455,8 +455,8 @@ class Belief:
                 new_val_key=new_state_mapping_dict[val_key]
                 inner_trans.update({new_val_key:val_val})
             new_transitions.update({new_key:inner_trans})
-
-        return states, MC(init=init_state, transitions=new_transitions, labels=new_labels, states=new_states)
+        mc= MC(init=init_state, transitions=new_transitions, labels=new_labels, states=new_states)
+        return states, mc 
 
 # if __name__=="__main__":
 
