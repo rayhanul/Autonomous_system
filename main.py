@@ -22,13 +22,15 @@ from collections import defaultdict
 
 if __name__=="__main__":
 
-    numiter = 500
-    number_mcs = 1
+    numiter = 100
+    number_mcs = 10
     complete_mc_time=[]
     complete_mc_states=[]
 
     total_verification_time=[]
     total_states_system=[]
+    total_synthesis_time=[]
+    true_system_states=[]
     '''
     dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
     control paper 
@@ -110,6 +112,13 @@ if __name__=="__main__":
 
         scheduler_autonomous=result.scheduler 
 
+
+        Agent1_pol, agen_1 = autonomous_agent.get_policies(
+            analyzer, autonomous_model, result, ['go1', 'stop1'])
+        
+        total_synthesis_time.append(time.time()-start_time)
+        
+
         # model for human agent
 
         analyzer2 = Analyzer()
@@ -153,15 +162,6 @@ if __name__=="__main__":
         scheduler_human=result_human.scheduler 
 
         #end of human model
-
-
-
-
-        Agent1_pol, agen_1 = autonomous_agent.get_policies(
-            analyzer, autonomous_model, result, ['go1', 'stop1'])
-
-
-
 
         Agent2_pol, agen_2 = human_agent.get_policies(
             analyzer2, model_human, result_human, ['go2', 'stop2'])
@@ -217,6 +217,7 @@ if __name__=="__main__":
             true_model, properties[0], only_initial_states=False, extract_scheduler=True)
         initial_state = true_model.initial_states[0]
         original_model_prob = result.at(initial_state)
+        true_system_states.append(true_model.nr_states)
 
 
         # print(
@@ -236,10 +237,11 @@ if __name__=="__main__":
         # print(f'total time : {total_execution_time}')
 
     avg_env_creation_time=sum(complete_mc_time)/numiter
-    print(f'Complete Environment construction time for {number_mcs}: {avg_env_creation_time}, average number of belief states: {sum(complete_mc_states)/numiter}\n')
+    print(f'Complete Environment construction time for {number_mcs}: {avg_env_creation_time}, average number of belief states: {abs(sum(complete_mc_states)/numiter)}\n')
 
-    print(f'Average verification time: {sum(total_verification_time)/numiter}, average number of states: {sum(total_states_system)/numiter}\n')
+    print(f'agent synthesis time: {sum(total_synthesis_time)/numiter}, average number of states: {sum(total_states_system)/numiter}\n')
 
+    print(f'True system: verification time: {sum(total_verification_time)/numiter}, total states in induced true system: {abs(sum(true_system_states)/numiter)}')
     fig = plt.figure()
     ax = plt.axes(projection='3d')
     xline = []
