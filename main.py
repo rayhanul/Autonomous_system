@@ -28,7 +28,7 @@ if __name__=="__main__":
     for i in range(0,3):
 
         numiter = 20
-        number_mcs = 2
+        number_mcs =8 
         
         '''
         dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
