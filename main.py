@@ -25,10 +25,10 @@ if __name__=="__main__":
     
 
     all_data={}
-    for i in range(0,3):
+    for i in range(0,1):
 
-        numiter = 20
-        number_mcs =8 
+        numiter = 22
+        number_mcs =10 
         
         '''
         dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
@@ -78,7 +78,7 @@ if __name__=="__main__":
             start_time=time.time()
             autonomous_agent = Agent(number_mcs=number_mcs, analyzer=analyzer, belief_manager="", template_model=template_model, belief_type=belief_type,
                                     env_model_type=env_model_type, env_model_name="env_model.nm", combined_model_name='final_combined_model.nm')
-            autonomous_mcs=autonomous_agent.get_agent_model()
+            autonomous_mcs, nr_belief_states, construction_time =autonomous_agent.get_agent_model()
 
             
             # formula = autonomous_agent.getFormula(
@@ -93,7 +93,7 @@ if __name__=="__main__":
 
             end_time=time.time()
             diff=end_time-start_time
-            complete_mc_time.append(diff)
+            complete_mc_time.append(construction_time)
             complete_mc_states.append(autonomous_agent.number_belief_states)
 
             # test 
@@ -132,7 +132,7 @@ if __name__=="__main__":
 
             human_agent = Agent(number_mcs=number_mcs, analyzer=analyzer2, belief_manager="", template_model=template_model, belief_type=belief_type,
                                 env_model_type=env_model_type, env_model_name="env_model_human.nm", combined_model_name='final_combined_model_human.nm')
-            human_mcs= human_agent.get_agent_model()
+            human_mcs, nr_belief_states_human, construction_time_human = human_agent.get_agent_model()
             # formula = human_agent.getFormula(
             #     agent_type='human', env_model_type=env_model_type)
 
@@ -272,18 +272,30 @@ if __name__=="__main__":
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')
-    xline = []
-    yline = []
-    zline = []
+    markers = ['.',',', 'o', 'v','^','<','>','1','2','3','4','8','s','p','P','*','h','H','+','x','X','D','d']
     for index, data in data_out.items():
+        xline = []
+        yline = []
+        zline = []
         for x,y in data:
             xline.append(x)
             yline.append(y)
             zline.append(data[(x, y)])
+        a_li = np.asarray([xline, yline, zline])
+        # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
+        ax.scatter3D(xline, yline, zline, marker=markers[index])
 
-    a_li = np.asarray([xline, yline, zline])
-    # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
-    ax.scatter3D(xline, yline, zline, c=zline)
+    # xline = []
+    # yline = []
+    # zline = []
+    # for index, data in data_out.items():
+    #     for x,y in data:
+    #         xline.append(x)
+    #         yline.append(y)
+    #         zline.append(data[(x, y)])
+    # a_li = np.asarray([xline, yline, zline])
+    # # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
+    # ax.scatter3D(xline, yline, zline, c=zline)
     ax.set_xlabel(r'$A$')
     ax.set_ylabel(r'$H$')
     ax.set_zlabel(r'$p_T$')
