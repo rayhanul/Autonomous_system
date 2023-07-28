@@ -45,11 +45,12 @@ class Agent:
             self.belief_manager=belief 
             self.transition=b3 
             old_states, b3_mc=belief.get_complete_MC(b3, belief.initial_belief_state )
+            end_time=time.time()
             if self.env_model_name=="env_model.nm":
                 agent_type="autonomous"
             else: 
                 agent_type="human-driver"
-            print(f'complete environment construction time : {time.time()-start} and number of states : {len(old_states)} for {agent_type} agent.')
+            print(f'complete environment construction time : {end_time-start} and number of states : {len(old_states)} for {agent_type} agent.')
             prism_model_generator=Prism_Model_Generator(b3_mc, old_states, self.number_states)
             environment_prism_model=prism_model_generator.get_prism_model()
 
@@ -79,7 +80,7 @@ class Agent:
         self.analyzer.writeToFile(environment_prism_model, self.env_model_name )
         self.analyzer.create_combined_model(environment_prism_model, self.template_model, self.combined_model_name)
 
-        return self.mcs 
+        return self.mcs,  len(old_states), end_time-start
         
     def getFormula(self, agent_type, env_model_type):
         '''
