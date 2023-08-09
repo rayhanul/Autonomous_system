@@ -27,8 +27,8 @@ if __name__=="__main__":
     all_data={}
     for i in range(0,1):
 
-        numiter = 22
-        number_mcs =10 
+        numiter = 400
+        number_mcs =16
         
         '''
         dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
@@ -269,33 +269,50 @@ if __name__=="__main__":
     print(f'agent synthesis time: {get_average("synthesis_time")}, average number of states: {get_average("composed_states")}\n')
 
     print(f'True system: verification time: {get_average("verification_time")}, total states in induced true system: {get_average("true_system_states")}')
+    print(f'Probability S_T satisfy specification: {original_model_prob}')
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')
-    markers = ['.',',', 'o', 'v','^','<','>','1','2','3','4','8','s','p','P','*','h','H','+','x','X','D','d']
-    for index, data in data_out.items():
-        xline = []
-        yline = []
-        zline = []
-        for x,y in data:
-            xline.append(x)
-            yline.append(y)
-            zline.append(data[(x, y)])
-        a_li = np.asarray([xline, yline, zline])
-        # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
-        ax.scatter3D(xline, yline, zline, marker=markers[index])
 
-    # xline = []
-    # yline = []
-    # zline = []
+    
+    markers = ['.',',', 'o', 'v','^','<','>','1','2','3','4','8','s','p','P','*','h','+','x','X','d']
+
+
+    # different marker in 3D 
     # for index, data in data_out.items():
+    #     xline = []
+    #     yline = []
+    #     zline = []
     #     for x,y in data:
     #         xline.append(x)
     #         yline.append(y)
     #         zline.append(data[(x, y)])
-    # a_li = np.asarray([xline, yline, zline])
-    # # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
-    # ax.scatter3D(xline, yline, zline, c=zline)
+    #     a_li = np.asarray([xline, yline, zline])
+    #     # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
+    #     ax.scatter3D(xline, yline, zline, c= zline, marker=markers[index])
+
+    # original approach
+    xline = []
+    yline = []
+    zline = []
+    for index, data in data_out.items():
+        x_avg=0
+        y_avg=0
+        z_val=0
+        for x,y in data:
+           x_avg += x 
+           y_avg += y 
+
+           z_val=data[(x, y)]   
+        x_avg=x_avg/len(data)
+        y_avg=y_avg/len(data)
+
+        xline.append(x_avg)
+        yline.append(y_avg)
+        zline.append(z_val)
+    a_li = np.asarray([xline, yline, zline])
+    # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
+    ax.scatter3D(xline, yline, zline, c=zline)
     ax.set_xlabel(r'$A$')
     ax.set_ylabel(r'$H$')
     ax.set_zlabel(r'$p_T$')

@@ -305,7 +305,7 @@ class Belief:
         next_b='b'+str(number_beliefs)
 
         # update belief if not in withing given threshold... 
-        flag, belief_name, next_belief = self.get_Belief_within_threshold(next_b, normalized_next_belief_distribution, threshold=0.05)
+        flag, belief_name, next_belief = self.get_Belief_within_threshold(next_b, normalized_next_belief_distribution, threshold=0.1)
         if not flag:
             self.all_beliefs.update({next_b:normalized_next_belief_distribution})
         else: 
