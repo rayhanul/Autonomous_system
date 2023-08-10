@@ -28,7 +28,7 @@ if __name__=="__main__":
     for i in range(0,1):
 
         numiter = 400
-        number_mcs =2
+        number_mcs =1
         
         '''
         dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
@@ -273,10 +273,8 @@ if __name__=="__main__":
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')
-
-    
     markers = ['.',',', 'o', 'v','^','<','>','1','2','3','4','8','s','p','P','*','h','+','x','X','d']
-
+    plt.rcParams["font.family"] = "Times"
 
     # different marker in 3D 
     # for index, data in data_out.items():
@@ -315,6 +313,9 @@ if __name__=="__main__":
     ax.scatter3D(xline, yline, zline, c=zline)
     ax.set_ylabel(r'$Average \;p \; of \; Vehicle \; A$')
     ax.set_xlabel(r'$Average \;p \; of \; Vehicle \; H$')
+    if number_mcs == 1:
+        ax.set_ylabel(r'$p \; of \; Vehicle \; A$')
+        ax.set_xlabel(r'$p \; of \; Vehicle \; H$')
     ax.set_zlabel(r'$Pr(S_T \models \varphi)$')
     ax.view_init(elev=15.389610389610361, azim=293.08441558441547)
     
