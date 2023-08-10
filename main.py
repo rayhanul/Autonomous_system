@@ -28,7 +28,7 @@ if __name__=="__main__":
     for i in range(0,1):
 
         numiter = 400
-        number_mcs =16
+        number_mcs =2
         
         '''
         dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
@@ -313,13 +313,18 @@ if __name__=="__main__":
     a_li = np.asarray([xline, yline, zline])
     # np.savetxt('TwoCarThreshold075.csv',a_li.T,delimiter=',')
     ax.scatter3D(xline, yline, zline, c=zline)
-    ax.set_xlabel(r'$A$')
-    ax.set_ylabel(r'$H$')
-    ax.set_zlabel(r'$p_T$')
+    ax.set_ylabel(r'$Average \;p \; of \; Vehicle \; A$')
+    ax.set_xlabel(r'$Average \;p \; of \; Vehicle \; H$')
+    ax.set_zlabel(r'$Pr(S_T \models \varphi)$')
+    ax.view_init(elev=15.389610389610361, azim=293.08441558441547)
+    
     plt.xlim(0,1)
     plt.ylim(0,1)
     plt.ioff()
     plt.show()
+    # getting viewing angle... 
+    # print('ax.azim {}'.format(ax.azim))
+    # print('ax.elev {}'.format(ax.elev))
 
 
 
