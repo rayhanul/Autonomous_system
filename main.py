@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import time 
 from analyzer import * 
 from Agent import * 
-
+import itertools
 import time 
 
 from collections import defaultdict 

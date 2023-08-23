@@ -328,7 +328,29 @@ class Belief:
             if len(difference) == len(values):
                 return True, idx, self.all_beliefs[idx]
         return False, [], [] 
-        
+    def tau3(self):
+        return ''
+    def get_discretized_beliefs(self, n, delta):
+        basis_vectors=self.get_basis_vectors(n)
+
+        return ''
+    
+    def get_coefficients(self, delta):
+        coefficients= [0]
+
+        iter=1
+
+        while iter * delta<=1:
+            coefficients.append(iter * delta)
+            iter += 1 
+
+        return coefficients 
+
+
+
+    def get_basis_vectors(self, n):
+        basis_vectors=[tuple([0 if j != i else 1 for j in range(n)]) for i in range(n)]
+        return basis_vectors
 
     def get_complete_environment_model(self):
 
