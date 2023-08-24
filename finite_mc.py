@@ -230,6 +230,9 @@ class Belief:
         
         self.all_beliefs.update({init_belief:b_distribution})
         self.initial_belief_state=(mcs[0]['mc'].init, init_belief)
+        
+        # tau 3 code 
+        self.all_beliefs=self.get_discretized_beliefs(len(mcs), delta=0.2)
 
     def tau(self, current_state, next_state, current_belief):
         '''
@@ -269,7 +272,19 @@ class Belief:
             next_b=belief_name
 
         return next_b 
+    
+    def get_Belief_within_threshold(self, belief, belief_distribution, threshold):
 
+        belief_name=None 
+        for idx, val in self.all_beliefs.items():
+            values=list(val.values())
+            values2=list(belief_distribution.values())
+            difference= [abs(val-val2) for val, val2 in zip(values, values2) if abs(val-val2) <=threshold]
+            belief_name=idx 
+            if len(difference) == len(values):
+                return True, idx, self.all_beliefs[idx]
+        return False, [], [] 
+    
     def tau2(self, current_state, next_state, current_belief):
         '''
         this tau is based on next states reachable from next state
@@ -312,28 +327,60 @@ class Belief:
             next_b=belief_name
 
         return next_b 
+    
+    def tau3(self, current_state, next_state, current_belief):
 
+        # tau is implemented based on 
 
+        current_belief_distribution=self.all_beliefs[current_belief]
 
+        all_next_states=self.get_all_next_states(next_state)
 
+        next_belief_distribution={}
 
-    def get_Belief_within_threshold(self, belief, belief_distribution, threshold):
+        for idx, mc in self.mcs.items():
+            prob=0
+            try:
+                transition_prob_current_belief=mc['mc'].transitions[current_state][next_state]
+                belief_prob=current_belief_distribution[idx] 
+            except:
+                belief_prob=0
+            for state in all_next_states:
+                if mc['mc'].has_transition(next_state, state):
+                    prob +=  mc['mc'].get_transition_probability(next_state, state)
+            prob= transition_prob_current_belief * belief_prob * prob
+            next_belief_distribution.update({idx:prob})
 
-        belief_name=None 
-        for idx, val in self.all_beliefs.items():
-            values=list(val.values())
-            values2=list(belief_distribution.values())
-            difference= [abs(val-val2) for val, val2 in zip(values, values2) if abs(val-val2) <=threshold]
-            belief_name=idx 
-            if len(difference) == len(values):
-                return True, idx, self.all_beliefs[idx]
-        return False, [], [] 
-    def tau3(self):
-        return ''
+        # normalize the next_belief_distribution 
+        total=sum(next_belief_distribution.values())
+        normalized_next_belief_distribution={}
+        for idx, val in next_belief_distribution.items():
+            norm_val=val/total
+            normalized_next_belief_distribution.update({idx:norm_val})
+        normalized_belief_tuple = tuple(normalized_next_belief_distribution.values())   
+        next_belief=self.closest_belief(normalized_belief_tuple, self.all_beliefs )
+
+        return next_belief
+
     def get_discretized_beliefs(self, n, delta):
         basis_vectors=self.get_basis_vectors(n)
+        coefficients = self.get_coefficients(delta)
+        discretized_beliefs = []
+        for coeff_combination in itertools.product(coefficients, repeat=n):
+            if sum(coeff_combination) <= 1:
+                belief = tuple(sum(coeff * basis_vectors[i][j] for i, coeff in enumerate(coeff_combination)) for j in range(n))
+                if sum(belief)==1:
+                    discretized_beliefs.append(belief)
 
-        return ''
+        all_belief_names={}
+        iter=1
+        for belief in discretized_beliefs:
+            belief_name= f'b{iter}'
+            all_belief_names.update({belief_name: belief})
+            iter = iter+1 
+
+        return all_belief_names
+
     
     def get_coefficients(self, delta):
         coefficients= [0]
@@ -380,6 +427,60 @@ class Belief:
 
         transition= self.get_normalized_transition(transitions)
         return transitions 
+
+    def get_complete_environment_model_tau3(self):
+
+        # all_mc_states=self.get_all_states(self)
+        all_mc_states=self.mcs[0]['mc'].states
+        init=self.mcs[0]['mc'].init
+        all_beliefs=self.all_beliefs
+        init_dist=[1/len(self.mcs) for i in range(len(self.mcs))]
+        product_states=[ (state, belief) for state in all_mc_states for belief in all_beliefs]
+        current_belief_state= self.closest_belief(init_dist, all_beliefs )
+        initial_belief_state=(init, current_belief_state)
+        self.initial_belief_state=initial_belief_state
+        visited=[]
+        transitions={}
+
+        Q=deque()
+        Q.append(self.initial_belief_state)
+
+        while len(Q) > 0:
+
+            elem=Q.popleft()
+            visited.append(elem)
+            all_next_states=self.get_all_next_states(elem[0])
+            transition={}
+            for state in all_next_states:
+                next_belief = self.tau3(elem[0], state, elem[1])
+                
+                next_belief_state=(state, next_belief)
+                if not next_belief_state in visited :
+                    Q.append(next_belief_state)
+
+                prob=self.get_belief_state_transition_probability(elem, next_belief_state, elem[1])
+                transition.update({next_belief_state:prob})
+            if len(transition) > 0 :
+                transitions.update({elem:transition})
+
+        transition= self.get_normalized_transition(transitions)
+        return transitions 
+
+    def l2_norm(self, point_a, point_b):
+        diff = np.array(point_a) - np.array(point_b)
+        l2 = np.sqrt(np.sum(diff**2))
+        return l2
+    def closest_belief(self, belief_point, all_discretized_beliefs):
+        closest_item = None
+        min_distance = float('inf')
+
+        for name, dist in all_discretized_beliefs.items():
+            distance = self.l2_norm(belief_point, dist)
+            if distance < min_distance:
+                min_distance = distance
+                closest_item = name
+
+        return closest_item
     def get_normalized_transition(self, transition):
         updated_transition={}
         for key, val in transition.items():

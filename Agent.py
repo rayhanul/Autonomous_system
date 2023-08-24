@@ -40,7 +40,7 @@ class Agent:
             # else:
             belief=Belief(self.mcs)
             start=time.time()
-            b3= belief.get_complete_environment_model()
+            b3= belief.get_complete_environment_model_tau3()
             
             self.belief_manager=belief 
             self.transition=b3 
