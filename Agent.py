@@ -8,7 +8,7 @@ import time
 
 class Agent:
 
-    def __init__(self, number_mcs, analyzer, belief_manager, template_model, belief_type, env_model_type, env_model_name, combined_model_name='final_combined_model.nm' ):
+    def __init__(self, number_mcs, analyzer, belief_manager, template_model, belief_type, env_model_type, env_model_name, delta, combined_model_name='final_combined_model.nm' ):
         
         self.mcs=analyzer.get_mcs(number_mcs, env_model_type, env_model_name)
 
@@ -25,6 +25,7 @@ class Agent:
         self.labels={}
         self.number_states=2
         self.number_belief_states=0
+        self.delta=delta 
         if self.env_model_type=='original':
             self.prism_model_generator=Prism_Model_Generator(self.mcs, self.mcs[0]['mc'].labels, self.number_states)
 
@@ -38,7 +39,7 @@ class Agent:
             #     self.transition=self.mcs[0]['mc'].transitions
             #     environment_prism_model=self.prism_model_generator.get_prism_model_original()
             # else:
-            belief=Belief(self.mcs)
+            belief=Belief(self.mcs, self.delta)
             start=time.time()
             b3= belief.get_complete_environment_model_tau3()
             
@@ -133,7 +134,12 @@ class Agent:
         selected_mcs=self.mcs[random_mc]
 
         return selected_mcs
-    
+    def get_true_model_probability(self):
+        prob=0
+        num_mcs=len(self.mcs)
+        for item, val in self.mcs.items():
+            prob +=val['transition_prob']
+        return prob / num_mcs
     def get_EnvironmentModel(self):
         '''
         return the environment model 

@@ -218,7 +218,7 @@ class BeliefTransition:
 
 
 class Belief:
-    def __init__(self, mcs, init_belief='b0'):
+    def __init__(self, mcs, delta, init_belief='b0'):
 
         self.mcs=mcs 
 
@@ -232,7 +232,11 @@ class Belief:
         self.initial_belief_state=(mcs[0]['mc'].init, init_belief)
         
         # tau 3 code 
-        self.all_beliefs=self.get_discretized_beliefs(len(mcs), delta=0.2)
+        
+        self.all_beliefs=self.get_discretized_beliefs(len(mcs), delta)
+
+        print("all done")
+        
 
     def tau(self, current_state, next_state, current_belief):
         '''
@@ -361,39 +365,53 @@ class Belief:
         next_belief=self.closest_belief(normalized_belief_tuple, self.all_beliefs )
 
         return next_belief
-
+    
+    def can_add_tuple(self, new_tuple, existing_tuples, delta):
+        for existing_tuple in existing_tuples:
+            if self.infinity_norm(new_tuple, existing_tuple) < delta:
+                return False
+        return True
+    
     def get_discretized_beliefs(self, n, delta):
         basis_vectors=self.get_basis_vectors(n)
         coefficients = self.get_coefficients(delta)
         discretized_beliefs = []
         for coeff_combination in itertools.product(coefficients, repeat=n):
+            # if sum(coeff_combination) <= 1:
+            #     belief = tuple(sum(coeff * basis_vectors[i][j] for i, coeff in enumerate(coeff_combination)) for j in range(n))
+            #     if sum(belief)==1:
+            #         discretized_beliefs.append(belief)
             if sum(coeff_combination) <= 1:
                 belief = tuple(sum(coeff * basis_vectors[i][j] for i, coeff in enumerate(coeff_combination)) for j in range(n))
-                if sum(belief)==1:
-                    discretized_beliefs.append(belief)
-
+                sum_of_elements = sum(belief)
+                if sum_of_elements==0: 
+                    continue
+                normalized_tuple = tuple(round(element / sum_of_elements,2) for element in belief)
+                # if sum(normalized_tuple)==1:
+                #     discretized_beliefs.append(belief)
+                if len(discretized_beliefs)==0:
+                    discretized_beliefs.append(normalized_tuple)
+                else:
+                    if self.can_add_tuple(normalized_tuple, discretized_beliefs, delta):
+                        discretized_beliefs.append(normalized_tuple)
         all_belief_names={}
         iter=1
         for belief in discretized_beliefs:
             belief_name= f'b{iter}'
             all_belief_names.update({belief_name: belief})
-            iter = iter+1 
+            iter = iter+1
 
+        # print(f"Total number of discretized states: {len(all_belief_names)}") 
         return all_belief_names
 
     
     def get_coefficients(self, delta):
         coefficients= [0]
-
         iter=1
-
         while iter * delta<=1:
-            coefficients.append(iter * delta)
+            coefficients.append(round(iter * delta,2))
             iter += 1 
-
         return coefficients 
-
-
 
     def get_basis_vectors(self, n):
         basis_vectors=[tuple([0 if j != i else 1 for j in range(n)]) for i in range(n)]
@@ -470,12 +488,17 @@ class Belief:
         diff = np.array(point_a) - np.array(point_b)
         l2 = np.sqrt(np.sum(diff**2))
         return l2
+    
+    def infinity_norm(self, point_a, point_b):
+        diff=tuple(np.abs(x - y) for x, y in zip(point_a, point_b))
+        norm=np.max(diff)
+        return norm
     def closest_belief(self, belief_point, all_discretized_beliefs):
         closest_item = None
         min_distance = float('inf')
 
         for name, dist in all_discretized_beliefs.items():
-            distance = self.l2_norm(belief_point, dist)
+            distance = self.infinity_norm(belief_point, dist)
             if distance < min_distance:
                 min_distance = distance
                 closest_item = name

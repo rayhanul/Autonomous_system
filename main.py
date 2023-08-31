@@ -27,8 +27,9 @@ if __name__=="__main__":
     all_data={}
     for i in range(0,1):
 
-        numiter = 400
-        number_mcs =1
+        numiter = 2
+        number_mcs = 7
+        delta=0.10
         
         '''
         dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
@@ -68,6 +69,7 @@ if __name__=="__main__":
         total_states_system=[]
         total_synthesis_time=[]
         true_system_states=[]
+        avg_prob=[]
 
         for iter in range(0, numiter):
 
@@ -76,7 +78,7 @@ if __name__=="__main__":
             # model for Autonomous agent...
             analyzer = Analyzer()
             start_time=time.time()
-            autonomous_agent = Agent(number_mcs=number_mcs, analyzer=analyzer, belief_manager="", template_model=template_model, belief_type=belief_type,
+            autonomous_agent = Agent(number_mcs=number_mcs, analyzer=analyzer, belief_manager="", template_model=template_model, delta=delta, belief_type=belief_type,
                                     env_model_type=env_model_type, env_model_name="env_model.nm", combined_model_name='final_combined_model.nm')
             autonomous_mcs, nr_belief_states, construction_time =autonomous_agent.get_agent_model()
 
@@ -130,7 +132,7 @@ if __name__=="__main__":
             analyzer2 = Analyzer()
             # mcs_human=analyzer2.get_set_of_mcs(number_mcs)
 
-            human_agent = Agent(number_mcs=number_mcs, analyzer=analyzer2, belief_manager="", template_model=template_model, belief_type=belief_type,
+            human_agent = Agent(number_mcs=number_mcs, analyzer=analyzer2, belief_manager="", template_model=template_model, belief_type=belief_type, delta=delta,
                                 env_model_type=env_model_type, env_model_name="env_model_human.nm", combined_model_name='final_combined_model_human.nm')
             human_mcs, nr_belief_states_human, construction_time_human = human_agent.get_agent_model()
             # formula = human_agent.getFormula(
@@ -188,6 +190,7 @@ if __name__=="__main__":
                 if env_model_type=='original':
                     random_mc=autonomous_agent.chooseEnvironmentModel()
                     prob=random_mc['transition_prob']
+                    prob=autonomous_agent.get_true_model_probability()
                     number_states=len(random_mc['mc'].states )
                     init = random_mc['mc'].init  
                     true_env_autonomous=autonomous_agent.prism_model_generator.get_prism_model_true_system(prob, number_states, init[1])
@@ -240,6 +243,7 @@ if __name__=="__main__":
             data_out.update({iter: mc_data})
             total_execution_time=time.time()-start_time
             total_verification_time.append(total_execution_time)
+            avg_prob.append(original_model_prob)
             # print(f'total time : {total_execution_time}')
 
         avg_env_creation_time=sum(complete_mc_time)/numiter
@@ -257,19 +261,21 @@ if __name__=="__main__":
             'synthesis_time':sum(total_synthesis_time)/numiter, 
             'composed_states':sum(total_states_system)/numiter, 
             'verification_time': sum(total_verification_time)/numiter, 
-            'true_system_states': sum(true_system_states)/numiter
+            'true_system_states': sum(true_system_states)/numiter, 
+            'avg_prob': sum(avg_prob)/numiter
             }})
         
         def get_average(key):
             avg= sum(val[key] for _, val in all_data.items()) / len(all_data)
             return avg 
+        print(f'iteration: {i}')
 
     print(f'Complete Environment construction time for {number_mcs}: {get_average("env_cons_time")}, and number of belief states: {get_average("env_states")}\n')
 
     print(f'agent synthesis time: {get_average("synthesis_time")}, average number of states: {get_average("composed_states")}\n')
 
     print(f'True system: verification time: {get_average("verification_time")}, total states in induced true system: {get_average("true_system_states")}')
-    print(f'Probability S_T satisfy specification: {original_model_prob}')
+    print(f'Probability S_T satisfy specification: {get_average("avg_prob")}')
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')
