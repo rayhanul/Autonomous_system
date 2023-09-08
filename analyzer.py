@@ -141,7 +141,7 @@ class Analyzer:
             random_ps.append(p2)
 
         # if env_model=='env_model.nm':
-        # random_ps=[0.63, 0.68, 0.73]
+        random_ps=[0.63, 0.78,]
 
         mcs={}
         for index in range(number_mcs):

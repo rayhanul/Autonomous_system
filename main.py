@@ -27,9 +27,9 @@ if __name__=="__main__":
     all_data={}
     for i in range(0,1):
 
-        numiter = 2
-        number_mcs = 7
-        delta=0.10
+        numiter = 1
+        number_mcs = 2
+        delta=0.20
         
         '''
         dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
@@ -191,6 +191,7 @@ if __name__=="__main__":
                     random_mc=autonomous_agent.chooseEnvironmentModel()
                     prob=random_mc['transition_prob']
                     prob=autonomous_agent.get_true_model_probability()
+                    prob=0.65
                     number_states=len(random_mc['mc'].states )
                     init = random_mc['mc'].init  
                     true_env_autonomous=autonomous_agent.prism_model_generator.get_prism_model_true_system(prob, number_states, init[1])

@@ -506,12 +506,24 @@ class Belief:
         return closest_item
     def get_normalized_transition(self, transition):
         updated_transition={}
+        # for key, val in transition.items():
+        #     if sum(val.values()) != 0:
+        #         factor = 1.0/sum(val.values())
+        #         for inner_key, inner_val in val.items():
+        #             val[inner_key]= round(factor * val[inner_key],2)
+        #         updated_transition.update({key:val})
+
         for key, val in transition.items():
-            if sum(val.values()) != 0:
-                factor = 1.0/sum(val.values())
-                for inner_key, inner_val in val.items():
-                    val[inner_key]= round(factor * val[inner_key],2)
-                updated_transition.update({key:val})
+
+            total=sum(val.values())
+
+            normalized_val = {key: value / total for key, value in val.items()}
+
+            updated_transition.update({key:normalized_val})
+
+
+
+
         return updated_transition 
 
 
@@ -545,7 +557,7 @@ class Belief:
                 state_transition_prob=mc['mc'].get_transition_probability(current_state[0], next_state[0])
                 prob += belief_prob * state_transition_prob
 
-        return round(prob,2)
+        return prob
     
     def assign_labels(self, states):
         labels={}
