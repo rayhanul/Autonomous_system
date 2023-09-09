@@ -23,13 +23,14 @@ from collections import defaultdict
 if __name__=="__main__":
 
     
-
+    output_file_name=''
     all_data={}
     for i in range(0,1):
 
         numiter = 1
         number_mcs = 2
         delta=0.20
+        output_file_name='result'+str(number_mcs)
         
         '''
         dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from
@@ -271,13 +272,20 @@ if __name__=="__main__":
             return avg 
         print(f'iteration: {i}')
 
-    print(f'Complete Environment construction time for {number_mcs}: {get_average("env_cons_time")}, and number of belief states: {get_average("env_states")}\n')
+    # print(f'Complete Environment construction time for {number_mcs}: {get_average("env_cons_time")}, and number of belief states: {get_average("env_states")}\n')
+    # print(f'agent synthesis time: {get_average("synthesis_time")}, average number of states: {get_average("composed_states")}\n')
+    # print(f'True system: verification time: {get_average("verification_time")}, total states in induced true system: {get_average("true_system_states")}')
+    # print(f'Probability S_T satisfy specification: {get_average("avg_prob")}')
 
-    print(f'agent synthesis time: {get_average("synthesis_time")}, average number of states: {get_average("composed_states")}\n')
+    output_results=f'Complete Environment construction time for {number_mcs}: {get_average("env_cons_time")}, and number of belief states: {get_average("env_states")}\n agent synthesis time: {get_average("synthesis_time")}, average number of states: {get_average("composed_states")}\n True system: verification time: {get_average("verification_time")}, total states in induced true system: {get_average("true_system_states")} \n Probability S_T satisfy specification: {get_average("avg_prob")}'
 
-    print(f'True system: verification time: {get_average("verification_time")}, total states in induced true system: {get_average("true_system_states")}')
-    print(f'Probability S_T satisfy specification: {get_average("avg_prob")}')
+    with open(output_file_name, 'w') as f:
 
+        f.write(output_results)
+
+    
+
+    print(output_results)
     fig = plt.figure()
     ax = plt.axes(projection='3d')
     markers = ['.',',', 'o', 'v','^','<','>','1','2','3','4','8','s','p','P','*','h','+','x','X','d']
