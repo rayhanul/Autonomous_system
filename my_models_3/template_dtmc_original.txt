@@ -1,0 +1,102 @@
+dtmc
+
+// Length of Street
+const int N=6;
+
+// pedestrian move probability
+//const double pL;
+//formula p_off = (s_p=0)|(s_p=2);
+//formula p_on = (s_p=1);
+formula crash = ((p=1)&((s=N-1)|(s2=N-1)))|(s=s2);
+formula action = go_action|stop_action;
+formula action2=go_action2|stop_action2;
+
+formula action3=go_action3|stop_action3;
+
+formula carpol1 = c1_go1|c1_stop1;
+formula carpol2 = c2_go2|c2_stop2;
+
+module car
+	s : [0..N] init 1;
+	go_action : bool init false;
+	stop_action: bool init false;
+	assign_flag : bool init true;
+	
+	[assign] assign_flag -> (assign_flag'=false);
+	[go] !action& !assign_flag -> 1:(go_action'=true);
+	[stop] !action & !assign_flag -> 1:(stop_action'=true);
+	[move] (s<N)&go_action -> (s'=s+1)&(go_action'=false)&(assign_flag'=true);
+	[move] (s<N)&stop_action -> (s'=s)&(stop_action'=false)&(assign_flag'=true);
+	[] (s=N) -> true;
+endmodule
+
+module car2
+	s2 : [0..N] init 0;
+	go_action2 : bool init false;
+	stop_action2: bool init false;
+	assign_flag2 : bool init true;
+	
+	[assign] assign_flag2 -> (assign_flag2'=false);
+	[go2] !action2 & !assign_flag2 -> 1:(go_action2'=true);
+	[stop2] !action2 & !assign_flag2 -> 1:(stop_action2'=true);
+	[move] (s2<N)&go_action2 -> (s2'=s2+1)&(go_action2'=false)&(assign_flag2'=true);
+	[move] (s2<N)&stop_action2 -> (s2'=s2)&(stop_action2'=false)&(assign_flag2'=true);
+	[] (s2=N) -> true;
+endmodule
+
+
+module car3
+	s3 : [-1..N] init -1;
+	go_action3 : bool init false;
+	stop_action3: bool init false;
+	assign_flag3 : bool init true;
+	
+	[assign] assign_flag3 -> (assign_flag3'=false);
+	[go3] !action3 & !assign_flag3 -> 1:(go_action3'=true);
+	[stop3] !action3 & !assign_flag3 -> 1:(stop_action3'=true);
+	[move] (s3<N)&go_action3 -> (s3'=s3+1)&(go_action3'=false)&(assign_flag3'=true);
+	[move] (s3<N)&stop_action3 -> (s3'=s3)&(stop_action3'=false)&(assign_flag3'=true);
+	[] (s3=N) -> true;
+endmodule
+
+
+
+%env_model%
+
+label "Goal" = (s=6)|(s2=6);
+
+label "s0" = (s=0);
+label "s1" = (s=1);
+label "s2" = (s=2);
+label "s3" = (s=3);
+label "s4" = (s=4);
+label "s5" = (s=5);
+label "s6" = (s=6);
+
+label "x0" = (s2=0);
+label "x1" = (s2=1);
+label "x2" = (s2=2);
+label "x3" = (s2=3);
+label "x4" = (s2=4);
+label "x5" = (s2=5);
+label "x6" = (s2=6);
+
+
+label "y31" = (s3=-1);
+label "y0" = (s3=0);
+label "y1" = (s3=1);
+label "y2" = (s3=2);
+label "y3" = (s3=3);
+label "y4" = (s3=4);
+label "y5" = (s3=5);
+label "y6" = (s3=6);
+
+
+
+label "go1" = go_action;
+label "stop1" = stop_action;
+label "go2" = go_action2;
+label "stop2" = stop_action2;
+
+label "go3" = go_action3;
+label "stop3" = stop_action3;
