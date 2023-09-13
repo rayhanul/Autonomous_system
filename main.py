@@ -29,7 +29,7 @@ if __name__=="__main__":
 
         numiter = 1
         number_mcs = 2
-        delta=0.20
+        delta=0.30
         output_file_name='result'+str(number_mcs)
         
         '''
@@ -181,6 +181,11 @@ if __name__=="__main__":
             #     convert_file.write('\n Policy 2\n')
             #     for idx, val in agen_2.items():
             #         convert_file.write(f'{idx}: {val}\n')
+
+            all_agent_policies={'agent1': agen_1, 'agent2':agen_2}
+
+            with open('all_policies.txt', 'w') as file: 
+                file.write(str(all_agent_policies))
                     
             # create complete model applying policies ...
             if env_model_type == 'original' and number_mcs==1:

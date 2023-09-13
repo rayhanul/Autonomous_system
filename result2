@@ -1,0 +1,4 @@
+Complete Environment construction time for 2: 0.0017614364624023438, and number of belief states: 3.0
+ agent synthesis time: 0.12465739250183105, average number of states: 1134.0
+ True system: verification time: 0.337139368057251, total states in induced true system: 99.0 
+ Probability S_T satisfy specification: 0.6499999999999979
