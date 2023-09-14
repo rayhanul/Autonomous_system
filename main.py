@@ -27,7 +27,7 @@ if __name__=="__main__":
     all_data={}
     for i in range(0,1):
 
-        numiter = 1
+        numiter = 500
         number_mcs = 2
         delta=0.30
         output_file_name='result'+str(number_mcs)
@@ -182,10 +182,6 @@ if __name__=="__main__":
             #     for idx, val in agen_2.items():
             #         convert_file.write(f'{idx}: {val}\n')
 
-            all_agent_policies={'agent1': agen_1, 'agent2':agen_2}
-
-            with open('all_policies.txt', 'w') as file: 
-                file.write(str(all_agent_policies))
                     
             # create complete model applying policies ...
             if env_model_type == 'original' and number_mcs==1:
@@ -197,13 +193,17 @@ if __name__=="__main__":
                     random_mc=autonomous_agent.chooseEnvironmentModel()
                     prob=random_mc['transition_prob']
                     prob=autonomous_agent.get_true_model_probability()
-                    prob=0.65
                     number_states=len(random_mc['mc'].states )
                     init = random_mc['mc'].init  
                     true_env_autonomous=autonomous_agent.prism_model_generator.get_prism_model_true_system(prob, number_states, init[1])
                 else:
                     true_env_autonomous = autonomous_agent.get_EnvironmentModel()
+            all_agent_policies={'agent1': agen_1, 'agent2':agen_2, 'true_pedestrian_prob': prob}
+            FileName=f'all_policies{iter}.txt'
+            fname=os.path.join('policies', FileName)
 
+            with open(fname, 'w') as file: 
+                file.write(str(all_agent_policies))
             dtmc_file = 'two_car_dtmc.prism'
             analyzer.create_dtmc_model_using_policies(
                 Agent1_pol, Agent2_pol, true_env_autonomous, dtmc_template_file, dtmc_file)

@@ -131,8 +131,8 @@ class Analyzer:
         #     p=.42
 
         random_ps=[]
-        # p=generate_p_within_limit(1e-5, 1-1e-5)
-        p=0.68
+        p=generate_p_within_limit(1e-5, 1-1e-5)
+        # p=0.68
         random_ps.append(p)
         delta=0.05
         for index in range(number_mcs-1):
@@ -141,7 +141,7 @@ class Analyzer:
             random_ps.append(p2)
 
         # if env_model=='env_model.nm':
-        random_ps=[0.63, 0.78,]
+        # random_ps=[0.63, 0.78,]
 
         mcs={}
         for index in range(number_mcs):
