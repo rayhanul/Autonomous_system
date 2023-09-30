@@ -17,19 +17,45 @@ from analyzer import *
 from Agent import * 
 import itertools
 import time 
+import random 
 
 from collections import defaultdict 
 
+
+
+def get_random_numbers(num_numbers, epsilon):
+    numbers=[]
+    for _ in range(num_numbers): 
+        num=random.random()
+        high=num+epsilon
+        low=num-epsilon 
+        if high>1: 
+            high=1
+        if low<0 : 
+            low =0 
+        numbers.append([high, low])
+    return numbers 
+
+
 if __name__=="__main__":
 
-    
+
     output_file_name=''
     all_data={}
+    
     for i in range(0,1):
 
-        numiter = 500
+        numiter = 5
         number_mcs = 2
-        delta=0.30
+        delta=0.10
+        random.seed(42)
+        random_numbers_autonomous=get_random_numbers(numiter, delta)
+        random.seed(32)
+        random_numbers_human=get_random_numbers(numiter, delta)
+        random.seed(42)
+
+
+
         output_file_name='result'+str(number_mcs)
         
         '''
@@ -80,7 +106,7 @@ if __name__=="__main__":
             analyzer = Analyzer()
             start_time=time.time()
             autonomous_agent = Agent(number_mcs=number_mcs, analyzer=analyzer, belief_manager="", template_model=template_model, delta=delta, belief_type=belief_type,
-                                    env_model_type=env_model_type, env_model_name="env_model.nm", combined_model_name='final_combined_model.nm')
+                                    env_model_type=env_model_type, random_numbers_limit=random_numbers_autonomous[iter], env_model_name="env_model.nm", combined_model_name='final_combined_model.nm')
             autonomous_mcs, nr_belief_states, construction_time =autonomous_agent.get_agent_model()
 
             
@@ -134,7 +160,7 @@ if __name__=="__main__":
             # mcs_human=analyzer2.get_set_of_mcs(number_mcs)
 
             human_agent = Agent(number_mcs=number_mcs, analyzer=analyzer2, belief_manager="", template_model=template_model, belief_type=belief_type, delta=delta,
-                                env_model_type=env_model_type, env_model_name="env_model_human.nm", combined_model_name='final_combined_model_human.nm')
+                                env_model_type=env_model_type, random_numbers_limit=random_numbers_human[iter], env_model_name="env_model_human.nm", combined_model_name='final_combined_model_human.nm')
             human_mcs, nr_belief_states_human, construction_time_human = human_agent.get_agent_model()
             # formula = human_agent.getFormula(
             #     agent_type='human', env_model_type=env_model_type)
@@ -193,17 +219,18 @@ if __name__=="__main__":
                     random_mc=autonomous_agent.chooseEnvironmentModel()
                     prob=random_mc['transition_prob']
                     prob=autonomous_agent.get_true_model_probability()
+                    prob=.65
                     number_states=len(random_mc['mc'].states )
                     init = random_mc['mc'].init  
                     true_env_autonomous=autonomous_agent.prism_model_generator.get_prism_model_true_system(prob, number_states, init[1])
                 else:
                     true_env_autonomous = autonomous_agent.get_EnvironmentModel()
-            all_agent_policies={'agent1': agen_1, 'agent2':agen_2, 'true_pedestrian_prob': prob}
-            FileName=f'all_policies{iter}.txt'
-            fname=os.path.join('policies', FileName)
+            # all_agent_policies={'agent1': agen_1, 'agent2':agen_2, 'true_pedestrian_prob': prob}
+            # FileName=f'all_policies{iter}.txt'
+            # fname=os.path.join('policies', FileName)
 
-            with open(fname, 'w') as file: 
-                file.write(str(all_agent_policies))
+            # with open(fname, 'w') as file: 
+            #     file.write(str(all_agent_policies))
             dtmc_file = 'two_car_dtmc.prism'
             analyzer.create_dtmc_model_using_policies(
                 Agent1_pol, Agent2_pol, true_env_autonomous, dtmc_template_file, dtmc_file)
@@ -251,6 +278,7 @@ if __name__=="__main__":
             total_execution_time=time.time()-start_time
             total_verification_time.append(total_execution_time)
             avg_prob.append(original_model_prob)
+
             # print(f'total time : {total_execution_time}')
 
         avg_env_creation_time=sum(complete_mc_time)/numiter
@@ -259,6 +287,23 @@ if __name__=="__main__":
         # print(f'agent synthesis time: {sum(total_synthesis_time)/numiter}, average number of states: {sum(total_states_system)/numiter}\n')
 
         # print(f'True system: verification time: {sum(total_verification_time)/numiter}, total states in induced true system: {abs(sum(true_system_states)/numiter)}')
+        # count_highest_prob=sum([1 for value in avg_prob if round(value,2)=prob])
+        print(f"All prob: {avg_prob}" )
+        avg_prob=[round(val,2) for val in avg_prob]
+        set_prob_values=set(avg_prob)
+        count_highest_prob=0
+        # avg_prob.count(0.65)
+        count_lowest_prob=0
+        count_avg_prob=0
+        for val in avg_prob:
+            if val > 0.45:
+                count_highest_prob += 1
+            elif val < 0.2:
+                count_lowest_prob +=1
+            else:
+                count_avg_prob +=1
+            
+        print(f'Total number of sample: {numiter}, number of MC: {number_mcs}, highest: {count_highest_prob}, average: {count_avg_prob}, and lowest: {count_lowest_prob}')
 
         all_data.update(
             {
@@ -269,21 +314,24 @@ if __name__=="__main__":
             'composed_states':sum(total_states_system)/numiter, 
             'verification_time': sum(total_verification_time)/numiter, 
             'true_system_states': sum(true_system_states)/numiter, 
-            'avg_prob': sum(avg_prob)/numiter
+            'avg_prob': sum(avg_prob)/numiter, 
+            'num_high_prob': count_highest_prob, 
+            'num_avg_prob':count_avg_prob, 
+            'num_low_prob': count_lowest_prob
             }})
         
         def get_average(key):
             avg= sum(val[key] for _, val in all_data.items()) / len(all_data)
             return avg 
-        print(f'iteration: {i}')
+        # print(f'iteration: {i}')
 
     # print(f'Complete Environment construction time for {number_mcs}: {get_average("env_cons_time")}, and number of belief states: {get_average("env_states")}\n')
     # print(f'agent synthesis time: {get_average("synthesis_time")}, average number of states: {get_average("composed_states")}\n')
     # print(f'True system: verification time: {get_average("verification_time")}, total states in induced true system: {get_average("true_system_states")}')
     # print(f'Probability S_T satisfy specification: {get_average("avg_prob")}')
-
+    count_items=f'\n number of highest prob: {get_average("num_high_prob")}, number of lowest prob: {get_average("num_low_prob")}, number of average prob: {get_average("num_avg_prob")}\n'
     output_results=f'Complete Environment construction time for {number_mcs}: {get_average("env_cons_time")}, and number of belief states: {get_average("env_states")}\n agent synthesis time: {get_average("synthesis_time")}, average number of states: {get_average("composed_states")}\n True system: verification time: {get_average("verification_time")}, total states in induced true system: {get_average("true_system_states")} \n Probability S_T satisfy specification: {get_average("avg_prob")}'
-
+    output_results=output_results + count_items 
     with open(output_file_name, 'w') as f:
 
         f.write(output_results)
@@ -337,15 +385,16 @@ if __name__=="__main__":
         ax.set_ylabel(r'$p \; of \; Vehicle \; A$')
         ax.set_xlabel(r'$p \; of \; Vehicle \; H$')
     ax.set_zlabel(r'$Pr(S_T \models \varphi)$')
-    ax.view_init(elev=15.389610389610361, azim=293.08441558441547)
+    ax.view_init(elev=9.0389610389610361, azim=299.95)
+    # ax.view_init(elev=8.389610389610361, azim=281.08441558441547)
     
     plt.xlim(0,1)
     plt.ylim(0,1)
     plt.ioff()
     plt.show()
     # getting viewing angle... 
-    # print('ax.azim {}'.format(ax.azim))
-    # print('ax.elev {}'.format(ax.elev))
+    print('ax.azim {}'.format(ax.azim))
+    print('ax.elev {}'.format(ax.elev))
 
 
 
@@ -398,5 +447,8 @@ if __name__=="__main__":
     #     ax.set_zlabel(r'$p_T$')
     #     plt.ioff()
     #     plt.show()
+
+
+
 
 

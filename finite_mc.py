@@ -235,7 +235,7 @@ class Belief:
         
         self.all_beliefs=self.get_discretized_beliefs(len(mcs), delta)
 
-        print("all done")
+        # print("all done")
         
 
     def tau(self, current_state, next_state, current_belief):

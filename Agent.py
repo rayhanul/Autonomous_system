@@ -8,9 +8,10 @@ import time
 
 class Agent:
 
-    def __init__(self, number_mcs, analyzer, belief_manager, template_model, belief_type, env_model_type, env_model_name, delta, combined_model_name='final_combined_model.nm' ):
+    def __init__(self, number_mcs, analyzer, belief_manager, template_model, belief_type, env_model_type, env_model_name, delta, random_numbers_limit=[], combined_model_name='final_combined_model.nm' ):
         
-        self.mcs=analyzer.get_mcs(number_mcs, env_model_type, env_model_name)
+        self.random_numbers_limit=random_numbers_limit 
+        self.mcs=analyzer.get_mcs(number_mcs, env_model_type, env_model_name, random_numbers_limit)
 
         self.analyzer=analyzer
         self.belief_manager=belief_manager
@@ -25,7 +26,9 @@ class Agent:
         self.labels={}
         self.number_states=2
         self.number_belief_states=0
-        self.delta=delta 
+        self.delta=delta
+        
+
         if self.env_model_type=='original':
             self.prism_model_generator=Prism_Model_Generator(self.mcs, self.mcs[0]['mc'].labels, self.number_states)
 
@@ -51,7 +54,7 @@ class Agent:
                 agent_type="autonomous"
             else: 
                 agent_type="human-driver"
-            print(f'complete environment construction time : {end_time-start} and number of states : {len(old_states)} for {agent_type} agent.')
+            # print(f'complete environment construction time : {end_time-start} and number of states : {len(old_states)} for {agent_type} agent.')
             prism_model_generator=Prism_Model_Generator(b3_mc, old_states, self.number_states)
             environment_prism_model=prism_model_generator.get_prism_model()
 

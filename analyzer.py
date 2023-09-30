@@ -61,17 +61,17 @@ class Analyzer:
         
         return False 
     
-    def get_mcs(self, number_mcs, env_model_type, env_type):
+    def get_mcs(self, number_mcs, env_model_type, env_type, random_numbers):
 
         if env_model_type=='original':
             # if number_mcs>1:
-            return self.get_set_of_mcs(number_mcs, env_model=env_type)
+            return self.get_set_of_mcs(number_mcs, random_numbers, env_model=env_type)
             # return self.get_mcs_original_paper()
         
         elif env_model_type=='control' :
             return self.get_mcs_control_paper()
         else :
-            return self.get_set_of_mcs(number_mcs)
+            return self.get_set_of_mcs(number_mcs, random_numbers)
 
 
     def get_mcs_control_paper(self):
@@ -120,7 +120,29 @@ class Analyzer:
         mcs.update({0:{'mc':mc, 'prob':1, 'transition_prob':p}})
 
         return mcs 
-    def get_set_of_mcs(self, number_mcs, env_model):
+    
+    def get_all_random_probs(self, random_numbers, num_numbers):
+
+        numbers=[]
+
+        how_many_to_generates=num_numbers-len(random_numbers)
+        if num_numbers>1:
+            high=random_numbers[0]
+            low=random_numbers[1]
+
+            
+
+            new_numbers = [random.uniform(low, high) for _ in range(how_many_to_generates)]
+
+            numbers = new_numbers+ random_numbers
+
+        else : 
+            numbers=random_numbers
+
+        return numbers
+
+
+    def get_set_of_mcs(self, number_mcs, random_numbers, env_model=""):
 
         '''
         return set of mc models to represent the behavior of pedestrian
@@ -134,15 +156,16 @@ class Analyzer:
         p=generate_p_within_limit(1e-5, 1-1e-5)
         # p=0.68
         random_ps.append(p)
-        delta=0.05
-        for index in range(number_mcs-1):
-            p2=generate_p_within_limit(p-delta, p+delta)
-            # p2= generate_p_within_limit(1e-5, 1-1e-5)
-            random_ps.append(p2)
+        delta=0.1
+        random_ps=self.get_all_random_probs(random_numbers, number_mcs)
+        # for index in range(number_mcs-1):
+        #     p2=generate_p_within_limit(p-delta, p+delta)
+        #     # p2= generate_p_within_limit(1e-5, 1-1e-5)
+        #     random_ps.append(p2)
 
         # if env_model=='env_model.nm':
-        # random_ps=[0.63, 0.78,]
-
+        # random_ps=[0.60, 0.90]
+        print(random_ps)
         mcs={}
         for index in range(number_mcs):
             
