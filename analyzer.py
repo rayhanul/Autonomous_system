@@ -132,9 +132,11 @@ class Analyzer:
 
             
 
-            new_numbers = [random.uniform(low, high) for _ in range(how_many_to_generates)]
+            # new_numbers = [random.uniform(low, high) for _ in range(how_many_to_generates)]
 
-            numbers = new_numbers+ random_numbers
+            numbers = np.linspace(low, high, num_numbers)
+
+            # numbers = new_numbers+ random_numbers
 
         else : 
             numbers=random_numbers
@@ -165,7 +167,7 @@ class Analyzer:
 
         # if env_model=='env_model.nm':
         # random_ps=[0.60, 0.90]
-        print(random_ps)
+        # print(random_ps)
         mcs={}
         for index in range(number_mcs):
             

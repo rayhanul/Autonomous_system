@@ -21,12 +21,15 @@ import random
 
 from collections import defaultdict 
 
-
+TRUE_PEDESTRIAN_PROBABILITY=0.65 
+AGENT_OBSERVATION_LOW=0.4 
+AGENT_OBSERVATION_HIGH=0.8
+EPSILON=0.10 
 
 def get_random_numbers(num_numbers, epsilon):
     numbers=[]
     for _ in range(num_numbers): 
-        num=random.random()
+        num=random.uniform(AGENT_OBSERVATION_LOW, AGENT_OBSERVATION_HIGH)
         high=num+epsilon
         low=num-epsilon 
         if high>1: 
@@ -45,13 +48,13 @@ if __name__=="__main__":
     
     for i in range(0,1):
 
-        numiter = 5
-        number_mcs = 2
+        numiter = 100
+        number_mcs = 7
         delta=0.10
         random.seed(42)
-        random_numbers_autonomous=get_random_numbers(numiter, delta)
+        random_numbers_autonomous=get_random_numbers(numiter, EPSILON)
         random.seed(32)
-        random_numbers_human=get_random_numbers(numiter, delta)
+        random_numbers_human=get_random_numbers(numiter, EPSILON)
         random.seed(42)
 
 
@@ -219,7 +222,7 @@ if __name__=="__main__":
                     random_mc=autonomous_agent.chooseEnvironmentModel()
                     prob=random_mc['transition_prob']
                     prob=autonomous_agent.get_true_model_probability()
-                    prob=.65
+                    prob=TRUE_PEDESTRIAN_PROBABILITY
                     number_states=len(random_mc['mc'].states )
                     init = random_mc['mc'].init  
                     true_env_autonomous=autonomous_agent.prism_model_generator.get_prism_model_true_system(prob, number_states, init[1])
