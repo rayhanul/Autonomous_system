@@ -20,6 +20,28 @@ import time
 
 from collections import defaultdict 
 
+<<<<<<< Updated upstream
+=======
+TRUE_PEDESTRIAN_PROBABILITY=0.65
+AGENT_OBSERVATION_LOW=0.63 
+AGENT_OBSERVATION_HIGH=0.83
+EPSILON=0.10 
+
+def get_random_numbers(num_numbers, epsilon):
+    numbers=[]
+    for _ in range(num_numbers): 
+        num=random.uniform(AGENT_OBSERVATION_LOW, AGENT_OBSERVATION_HIGH)
+        high=num+epsilon
+        low=num-epsilon 
+        if high>1: 
+            high=1
+        if low<0 : 
+            low =0 
+        numbers.append([high, low])
+    return numbers 
+
+
+>>>>>>> Stashed changes
 if __name__=="__main__":
 
     
@@ -27,9 +49,24 @@ if __name__=="__main__":
     all_data={}
     for i in range(0,1):
 
+<<<<<<< Updated upstream
         numiter = 1
         number_mcs = 2
         delta=0.20
+=======
+        numiter = 20
+        number_mcs = 3
+        delta=0.2
+        random.seed(42)
+        random_numbers_autonomous=get_random_numbers(numiter, EPSILON)
+        random.seed(32)
+        random_numbers_human=get_random_numbers(numiter, EPSILON)
+        random.seed(42)
+
+
+
+        output_file_name='result'+str(number_mcs)
+>>>>>>> Stashed changes
         
         '''
         dynamic can deal with any number of mcs with new belief model implemented as tau2, and classic belief is the same belief from

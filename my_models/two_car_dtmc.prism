@@ -114,8 +114,38 @@ module car1policy
 	[assign] !carpol1 &(s=1) & (s2=0) & (p=2) -> (c1_go1'=true);
 	[assign] !carpol1 &(s=4) & (s2=5) & (p=0) -> (c1_stop1'=true);
 	[assign] !carpol1 &(s=4) & (s2=5) & (p=2) -> (c1_stop1'=true);
+<<<<<<< Updated upstream
 	[assign] !carpol1 &(s=5) & (s2=5) & (p=0) -> (c1_go1'=true);
 	[assign] !carpol1 &(s=5) & (s2=5) & (p=2) -> (c1_go1'=true);
+=======
+	[assign] !carpol1 &(s=3) & (s2=5) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=3) & (s2=5) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=5) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=5) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=5) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=5) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=3) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=3) & (p=1) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=4) & (s2=2) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=2) & (p=1) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=3) & (s2=3) & (p=0) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=3) & (s2=3) & (p=1) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=4) & (s2=3) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=2) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=3) & (s2=3) & (p=2) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=4) & (s2=1) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=1) & (p=1) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=4) & (s2=1) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=3) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=3) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=2) & (s2=3) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=0) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=4) & (s2=0) & (p=1) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=4) & (s2=0) & (p=2) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=3) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=3) & (p=1) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=3) & (p=2) -> (c1_stop1'=true);
+>>>>>>> Stashed changes
 	[assign] !carpol1 &(s=5) & (s2=4) & (p=0) -> (c1_go1'=true);
 	[assign] !carpol1 &(s=5) & (s2=3) & (p=0) -> (c1_go1'=true);
 	[assign] !carpol1 &(s=4) & (s2=4) & (p=0) -> (c1_go1'=true);
@@ -145,6 +175,7 @@ module car1policy
 	[assign] !carpol1 &(s=2) & (s2=3) & (p=2) -> (c1_stop1'=true);
 	[assign] !carpol1 &(s=5) & (s2=0) & (p=0) -> (c1_go1'=true);
 	[assign] !carpol1 &(s=5) & (s2=0) & (p=2) -> (c1_go1'=true);
+<<<<<<< Updated upstream
 	[assign] !carpol1 &(s=4) & (s2=0) & (p=0) -> (c1_stop1'=true);
 	[assign] !carpol1 &(s=4) & (s2=0) & (p=2) -> (c1_stop1'=true);
 	[assign] !carpol1 &(s=1) & (s2=4) & (p=0) -> (c1_go1'=true);
@@ -165,6 +196,11 @@ module car1policy
 	[assign] !carpol1 &(s=2) & (s2=3) & (p=1) -> (c1_stop1'=true);
 	[assign] !carpol1 &(s=4) & (s2=0) & (p=1) -> (c1_go1'=true);
 	[assign] !carpol1 &(s=1) & (s2=3) & (p=1) -> (c1_stop1'=true);
+=======
+	[assign] !carpol1 &(s=1) & (s2=4) & (p=0) -> (c1_stop1'=true);
+	[assign] !carpol1 &(s=1) & (s2=4) & (p=1) -> (c1_go1'=true);
+	[assign] !carpol1 &(s=1) & (s2=4) & (p=2) -> (c1_stop1'=true);
+>>>>>>> Stashed changes
 endmodule
 module car2policy
 	c2_go2 : bool init false;
@@ -181,21 +217,34 @@ module car2policy
 	[assign] !carpol2 &(s=1) & (s2=1) & (p=1) -> (c2_go2'=true);
 	[assign] !carpol2 &(s=1) & (s2=0) & (p=1) -> (c2_stop2'=true);
 	[assign] !carpol2 &(s=3) & (s2=2) & (p=0) -> (c2_go2'=true);
+<<<<<<< Updated upstream
 	[assign] !carpol2 &(s=3) & (s2=2) & (p=1) -> (c2_stop2'=true);
 	[assign] !carpol2 &(s=3) & (s2=1) & (p=0) -> (c2_go2'=true);
 	[assign] !carpol2 &(s=3) & (s2=1) & (p=1) -> (c2_stop2'=true);
+=======
+	[assign] !carpol2 &(s=3) & (s2=2) & (p=1) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=3) & (s2=1) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=3) & (s2=1) & (p=1) -> (c2_go2'=true);
+>>>>>>> Stashed changes
 	[assign] !carpol2 &(s=2) & (s2=2) & (p=0) -> (c2_go2'=true);
 	[assign] !carpol2 &(s=2) & (s2=2) & (p=1) -> (c2_go2'=true);
 	[assign] !carpol2 &(s=3) & (s2=2) & (p=2) -> (c2_stop2'=true);
 	[assign] !carpol2 &(s=3) & (s2=1) & (p=2) -> (c2_stop2'=true);
 	[assign] !carpol2 &(s=2) & (s2=2) & (p=2) -> (c2_go2'=true);
+<<<<<<< Updated upstream
 	[assign] !carpol2 &(s=2) & (s2=1) & (p=2) -> (c2_go2'=true);
 	[assign] !carpol2 &(s=3) & (s2=0) & (p=0) -> (c2_go2'=true);
 	[assign] !carpol2 &(s=3) & (s2=0) & (p=1) -> (c2_stop2'=true);
+=======
+	[assign] !carpol2 &(s=2) & (s2=1) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=3) & (s2=0) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=3) & (s2=0) & (p=1) -> (c2_go2'=true);
+>>>>>>> Stashed changes
 	[assign] !carpol2 &(s=3) & (s2=0) & (p=2) -> (c2_go2'=true);
 	[assign] !carpol2 &(s=2) & (s2=0) & (p=2) -> (c2_stop2'=true);
 	[assign] !carpol2 &(s=1) & (s2=2) & (p=0) -> (c2_go2'=true);
 	[assign] !carpol2 &(s=1) & (s2=2) & (p=1) -> (c2_go2'=true);
+<<<<<<< Updated upstream
 	[assign] !carpol2 &(s=1) & (s2=2) & (p=2) -> (c2_go2'=true);
 	[assign] !carpol2 &(s=1) & (s2=1) & (p=2) -> (c2_go2'=true);
 	[assign] !carpol2 &(s=1) & (s2=0) & (p=2) -> (c2_stop2'=true);
@@ -203,6 +252,42 @@ module car2policy
 	[assign] !carpol2 &(s=4) & (s2=5) & (p=2) -> (c2_go2'=true);
 	[assign] !carpol2 &(s=5) & (s2=5) & (p=0) -> (c2_go2'=true);
 	[assign] !carpol2 &(s=5) & (s2=5) & (p=2) -> (c2_go2'=true);
+=======
+	[assign] !carpol2 &(s=1) & (s2=2) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=1) & (s2=1) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=1) & (s2=0) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=3) & (p=0) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=3) & (p=1) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=2) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=2) & (p=1) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=3) & (s2=3) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=3) & (s2=3) & (p=1) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=3) & (p=2) -> (c2_stop2'=true);
+	[assign] !carpol2 &(s=4) & (s2=2) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=3) & (s2=3) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=1) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=1) & (p=1) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=1) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=2) & (s2=3) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=2) & (s2=3) & (p=1) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=2) & (s2=3) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=0) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=0) & (p=1) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=0) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=1) & (s2=3) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=1) & (s2=3) & (p=1) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=1) & (s2=3) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=5) & (s2=5) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=5) & (s2=5) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=5) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=4) & (s2=5) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=3) & (s2=5) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=3) & (s2=5) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=2) & (s2=5) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=2) & (s2=5) & (p=2) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=1) & (s2=5) & (p=0) -> (c2_go2'=true);
+	[assign] !carpol2 &(s=1) & (s2=5) & (p=2) -> (c2_go2'=true);
+>>>>>>> Stashed changes
 	[assign] !carpol2 &(s=5) & (s2=4) & (p=0) -> (c2_stop2'=true);
 	[assign] !carpol2 &(s=5) & (s2=3) & (p=0) -> (c2_stop2'=true);
 	[assign] !carpol2 &(s=4) & (s2=4) & (p=0) -> (c2_go2'=true);
