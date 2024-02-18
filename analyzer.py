@@ -141,13 +141,8 @@ class Analyzer:
             random_ps.append(p2)
 
         # if env_model=='env_model.nm':
-<<<<<<< Updated upstream
-        random_ps=[0.63, 0.78,]
-
-=======
         # random_ps=[0.63, 0.83]
         # print(random_ps)
->>>>>>> Stashed changes
         mcs={}
         for index in range(number_mcs):
             
