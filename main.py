@@ -48,8 +48,8 @@ if __name__=="__main__":
     
     for i in range(0,1):
 
-        numiter = 100
-        number_mcs = 7
+        numiter = 20
+        number_mcs = 3
         delta=0.10
         random.seed(42)
         random_numbers_autonomous=get_random_numbers(numiter, EPSILON)
